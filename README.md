@@ -215,7 +215,3 @@ MIT License - see [LICENSE](LICENSE) file.
 This software provides **idealized simulations** for educational and research purposes. 
 The models are simplified to capture essential quantum tunneling physics but do not 
 represent complete quantum mechanical calculations. Use appropriately for your application.
-
-## Support
-
-Issues/questions: Open an issue on [GitHub](https://github.com/yourusername/1d-qt-ideal-solver/issues)
