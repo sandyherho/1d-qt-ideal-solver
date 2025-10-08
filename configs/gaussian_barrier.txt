@@ -1,0 +1,23 @@
+# Test Case 2: Smooth Gaussian Barrier (Idealized)
+# More realistic smooth potential
+scenario_name = Gaussian Barrier
+nx = 2048
+x_min = -10.0
+x_max = 10.0
+t_final = 5.0
+n_snapshots = 200
+barrier_type = gaussian
+barrier_height = 2.5
+barrier_width = 1.5
+barrier_center = 0.0
+particle_mass = 1.0
+x0 = -5.0
+k0 = 6.0
+sigma = 0.4
+adaptive_dt = true
+dt_min = 0.0001
+dt_max = 0.01
+save_netcdf = true
+save_animation = true
+fps = 30
+dpi = 100

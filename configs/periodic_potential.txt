@@ -1,0 +1,23 @@
+# Test Case 6: Periodic Potential - Band Structure (Idealized)
+# Idealized solid-state analog - Bloch waves and band gaps
+scenario_name = Periodic Potential Bands
+nx = 4096
+x_min = -20.0
+x_max = 20.0
+t_final = 10.0
+n_snapshots = 350
+barrier_type = periodic
+barrier_height = 1.5
+n_periods = 8
+period_length = 4.0
+particle_mass = 1.0
+x0 = -10.0
+k0 = 4.5
+sigma = 0.6
+adaptive_dt = true
+dt_min = 0.00005
+dt_max = 0.01
+save_netcdf = true
+save_animation = true
+fps = 40
+dpi = 120

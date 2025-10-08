@@ -1,0 +1,23 @@
+# Test Case 5: Triple Barrier Complex Resonances (Idealized)
+# Multiple resonances and quantum beats
+scenario_name = Triple Barrier System
+nx = 4096
+x_min = -15.0
+x_max = 15.0
+t_final = 8.0
+n_snapshots = 300
+barrier_type = triple_barrier
+barrier_height = 2.0
+barrier_width = 0.8
+barrier_separation = 2.5
+particle_mass = 1.0
+x0 = -8.0
+k0 = 5.8
+sigma = 0.4
+adaptive_dt = true
+dt_min = 0.00005
+dt_max = 0.008
+save_netcdf = true
+save_animation = true
+fps = 35
+dpi = 110

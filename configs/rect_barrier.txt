@@ -1,0 +1,23 @@
+# Test Case 1: Classic Rectangular Potential Barrier (Idealized)
+# Simplest quantum tunneling scenario
+scenario_name = Rectangular Barrier
+nx = 2048
+x_min = -10.0
+x_max = 10.0
+t_final = 5.0
+n_snapshots = 200
+barrier_type = rectangular
+barrier_height = 2.0
+barrier_width = 2.0
+barrier_center = 0.0
+particle_mass = 1.0
+x0 = -5.0
+k0 = 5.0
+sigma = 0.5
+adaptive_dt = true
+dt_min = 0.0001
+dt_max = 0.01
+save_netcdf = true
+save_animation = true
+fps = 30
+dpi = 100

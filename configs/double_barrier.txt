@@ -1,0 +1,23 @@
+# Test Case 4: Double Barrier Resonant Tunneling (Idealized)
+# Quantum interference and resonance effects
+scenario_name = Double Barrier Resonance
+nx = 2048
+x_min = -12.0
+x_max = 12.0
+t_final = 6.0
+n_snapshots = 250
+barrier_type = double_barrier
+barrier_height = 2.0
+barrier_width = 1.0
+barrier_separation = 2.0
+particle_mass = 1.0
+x0 = -6.0
+k0 = 5.5
+sigma = 0.5
+adaptive_dt = true
+dt_min = 0.0001
+dt_max = 0.01
+save_netcdf = true
+save_animation = true
+fps = 30
+dpi = 100
