@@ -1,6 +1,6 @@
-# Test Case 4: Double Barrier Resonant Tunneling (Idealized)
-# Quantum interference and resonance effects
-scenario_name = Double Barrier Resonance
+# Case 2: Double Barrier (Intermediate)
+# Resonant tunneling and quantum interference
+scenario_name = Case 2 - Double Barrier
 nx = 2048
 x_min = -12.0
 x_max = 12.0

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "1d-qt-ideal-solver"
 version = "0.0.1"
-description = "Idealized 1D quantum tunneling solver with adaptive time stepping and Numba acceleration"
+description = "Simplified 1D quantum tunneling solver with 4 classic test cases"
 authors = [
     "Siti N. Kaban",
     "Sandy H. S. Herho <sandy.herho@email.ucr.edu>",
@@ -10,32 +10,7 @@ authors = [
 ]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/sandyherho/1d-qt-ideal-solver"
-repository = "https://github.com/sandyherho/1d-qt-ideal-solver"
-documentation = "https://github.com/sandyherho/1d-qt-ideal-solver/blob/main/README.md"
-keywords = ["quantum-mechanics", "tunneling", "idealized-simulation", "schrodinger-equation", "numba", "adaptive-timestepping"]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Science/Research",
-    "Intended Audience :: Education",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Scientific/Engineering :: Physics",
-    "Topic :: Education",
-    "Operating System :: OS Independent",
-    "Natural Language :: English"
-]
 packages = [{include = "qt1d_ideal", from = "src"}]
-include = [
-    "configs/*.txt",
-    "LICENSE",
-    "README.md"
-]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -48,9 +23,6 @@ numba = ">=0.53.0"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=22.0.0"
-flake8 = ">=4.0.0"
-ipython = ">=7.0.0"
-mypy = ">=0.900"
 
 [tool.poetry.scripts]
 qt1d-simulate = "qt1d_ideal.cli:main"
@@ -58,19 +30,3 @@ qt1d-simulate = "qt1d_ideal.cli:main"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 100
-target-version = ['py38']
-include = '\.pyi?$'
-
-[tool.isort]
-profile = "black"
-line_length = 100
-
-[tool.mypy]
-python_version = "3.8"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false
-ignore_missing_imports = true

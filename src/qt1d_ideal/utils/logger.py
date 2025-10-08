@@ -1,15 +1,9 @@
-"""Logging system."""
-
 import logging
 from pathlib import Path
 from datetime import datetime
 
-
 class SimulationLogger:
-    """Logger for simulations."""
-    
-    def __init__(self, scenario_name: str, log_dir: str = "logs", 
-                 verbose: bool = True):
+    def __init__(self, scenario_name, log_dir="logs", verbose=True):
         self.scenario_name = scenario_name
         self.log_dir = Path(log_dir)
         self.verbose = verbose
@@ -18,7 +12,7 @@ class SimulationLogger:
         self.log_file = self.log_dir / f"{scenario_name}_{timestamp}.log"
         self.logger = self._setup_logger()
     
-    def _setup_logger(self) -> logging.Logger:
+    def _setup_logger(self):
         logger = logging.getLogger(f"qt1d_{self.scenario_name}")
         logger.setLevel(logging.DEBUG)
         logger.handlers = []
@@ -29,19 +23,19 @@ class SimulationLogger:
         logger.addHandler(handler)
         return logger
     
-    def info(self, msg: str):
+    def info(self, msg):
         self.logger.info(msg)
     
-    def warning(self, msg: str):
+    def warning(self, msg):
         self.logger.warning(msg)
     
-    def error(self, msg: str):
+    def error(self, msg):
         self.logger.error(msg)
     
-    def log_parameters(self, params: dict):
+    def log_parameters(self, params):
         self.info(f"Parameters: {params}")
     
-    def log_timing(self, timing: dict):
+    def log_timing(self, timing):
         self.info(f"Timing: {timing}")
     
     def finalize(self):

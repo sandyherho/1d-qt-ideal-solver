@@ -1,6 +1,6 @@
-# Test Case 5: Triple Barrier Complex Resonances (Idealized)
+# Case 3: Triple Barrier (Advanced)
 # Multiple resonances and quantum beats
-scenario_name = Triple Barrier System
+scenario_name = Case 3 - Triple Barrier
 nx = 4096
 x_min = -15.0
 x_max = 15.0
