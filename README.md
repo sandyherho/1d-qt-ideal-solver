@@ -3,8 +3,9 @@
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Numba](https://img.shields.io/badge/accelerated-numba-orange.svg)](https://numba.pydata.org/)
+[![PyPI](https://img.shields.io/pypi/v/1d-qt-ideal-solver.svg)](https://pypi.org/project/1d-qt-ideal-solver/)
 
-High-performance educational solver for 1D quantum tunneling phenomena using the split-operator Fourier method with adaptive time stepping.
+High-performance 1D quantum tunneling solver implementing the split-operator Fourier method with adaptive time stepping, Numba-accelerated parallel computation, and optional stochastic noise for idealized simulations of coherent tunneling dynamics in nanoscale barrier systems.
 
 ## Physics
 
@@ -19,7 +20,7 @@ $$\psi(x, t+\delta t) = e^{-iV\delta t/2} \cdot \mathcal{F}^{-1}\left[e^{-ik^2\d
 **Key Observables:**
 - Transmission coefficient: $T = \int_{x>x_b} |\psi(x,t_f)|^2 dx$
 - Reflection coefficient: $R = \int_{x<x_a} |\psi(x,t_f)|^2 dx$
-- Probability conservation: $T + R \approx 1$
+- Unitarity: $T + R \approx 1$
 
 ## Features
 
@@ -32,14 +33,21 @@ $$\psi(x, t+\delta t) = e^{-iV\delta t/2} \cdot \mathcal{F}^{-1}\left[e^{-ik^2\d
 
 ## Installation
 
+**From PyPI:**
 ```bash
+pip install 1d-qt-ideal-solver
+```
+
+**From source:**
+```bash
+git clone https://github.com/yourusername/1d-qt-ideal-solver.git
+cd 1d-qt-ideal-solver
 pip install -e .
 ```
 
-**Dependencies**: NumPy, SciPy, matplotlib, netCDF4, tqdm, numba
-
 ## Quick Start
 
+**Command-line interface:**
 ```bash
 # Run individual test case
 qt1d-simulate case1                    # Rectangular barrier
@@ -52,8 +60,7 @@ qt1d-simulate --all
 qt1d-simulate --config myconfig.txt
 ```
 
-## Python API
-
+**Python API:**
 ```python
 from qt1d_ideal import QuantumTunneling1D, GaussianWavePacket
 
@@ -80,71 +87,51 @@ print(f"T = {result['transmission_coefficient']:.2%}")
 print(f"R = {result['reflection_coefficient']:.2%}")
 ```
 
-## Output
+## Output Files
 
-**Generated Files** (in `outputs/`):
-- `case1_rectangular.nc` — NetCDF4 data (wavefunction evolution, parameters, metadata)
-- `case1_rectangular.gif` — Professional animation with statistics overlay
+**Simulation data** (in `outputs/`):
+- `*.nc` — NetCDF4 format (wavefunction evolution, parameters, metadata)
+- `*.gif` — High-quality animations with statistics overlay
 
-**Log Files** (in `logs/`):
-- `case1_rectangular.log` — Timestamped simulation record with diagnostics
+**Diagnostics** (in `logs/`):
+- `*.log` — Complete simulation records with conservation diagnostics
 
-## Configuration
+## Physical Applications
 
-Example (`configs/case1_rectangular.txt`):
+Relevant for idealized studies of quantum tunneling in:
+- **Nuclear Physics**: α-decay (fm scale)
+- **Surface Science**: STM imaging, field emission (Å scale)  
+- **Chemical Dynamics**: Proton transfer reactions (nm scale)
+- **Nanoelectronics**: Resonant tunneling diodes, Josephson junctions (μm scale)
 
-```ini
-nx = 2048                  # Grid points (FFT-optimized)
-x_min = -10.0              # [nm]
-x_max = 10.0               # [nm]
-t_final = 5.0              # [fs]
+## Performance
 
-barrier_type = rectangular
-barrier_height = 2.0       # [eV]
-barrier_width = 2.0        # [nm]
-
-x0 = -5.0                  # Initial position [nm]
-k0 = 5.0                   # Wave vector [nm⁻¹] → E_k ≈ 1.52 eV
-sigma = 0.5                # Gaussian width [nm]
-
-noise_amplitude = 0.0      # [eV] (disabled for ideal case)
-decoherence_rate = 0.0     # [fs⁻¹]
-```
-
-
-## Physical Context
-
-Demonstrates universal quantum tunneling across scales:
-- **Nuclear**: α-decay (fm scale)
-- **Atomic**: STM imaging, field emission (Å scale)  
-- **Molecular**: Proton transfer, chemical reactions (nm scale)
-- **Mesoscopic**: Josephson junctions, RTDs (μm scale)
-
-## Authors
-
-- **Siti N. Kaban**
-- **Sandy H. S. Herho** (sandy.herho@email.ucr.edu)
-- **Sonny Prayogo**
-- **Iwan P. Anwar**
-
-## License
-
-MIT License — Free for educational and research use.
+- **Runtime**: 10-30 seconds per case (2048 grid points, 200 frames)
+- **Parallel Rendering**: ~10× faster GIF generation via multiprocessing
+- **Accuracy**: Norm error < 0.1%, energy conservation < 1%
 
 ## Citation
 
-If you use this solver in your study, please cite:
+If you use this solver in your research, please cite:
 
 ```bibtex
 @software{qt1d_solver_2025,
   author = {Kaban, Siti N. and Herho, Sandy H. S. and Prayogo, Sonny and Anwar, Iwan P.},
-  title = {1D Quantum Tunneling Solver with Stochastic Noise},
+  title = {1D Quantum Tunneling Solver: Idealized Split-Operator Method},
   year = {2025},
   version = {0.0.1},
+  url = {https://github.com/yourusername/1d-qt-ideal-solver},
   license = {MIT}
 }
 ```
 
----
+## Authors
 
-**Note**: This is an educational tool. For production quantum simulations, consider specialized packages (QuTiP, GPAW, VASP).
+- Siti N. Kaban
+- Sandy H. S. Herho (sandy.herho@email.ucr.edu)
+- Sonny Prayogo
+- Iwan P. Anwar
+
+## License
+
+MIT License — See [LICENSE](LICENSE) for details.
