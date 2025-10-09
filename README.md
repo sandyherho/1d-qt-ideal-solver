@@ -114,8 +114,8 @@ If you use this solver in your research, please cite:
   author = {Kaban, Siti N. and Herho, Sandy H. S. and Prayogo, Sonny and Anwar, Iwan P.},
   title = {1D Quantum Tunneling Solver: Idealized Split-Operator Method},
   year = {2025},
-  version = {0.0.1},
-  url = {https://github.com/yourusername/1d-qt-ideal-solver},
+  version = {0.0.4},
+  url = {https://github.com/sandyherho/1d-qt-ideal-solver},
   license = {MIT}
 }
 ```
