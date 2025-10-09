@@ -167,7 +167,7 @@ class DataHandler:
             # General information
             nc.description = "1D Quantum Tunneling Simulation with Stochastic Noise"
             nc.created = datetime.now().isoformat()
-            nc.software = "1d-qt-ideal-solver v0.0.2"
+            nc.software = "1d-qt-ideal-solver v0.0.3"
             nc.author = "Siti N. Kaban, Sandy H. S. Herho, Sonny Prayogo, Iwan P. Anwar"
             
             # Physical results (key observables)

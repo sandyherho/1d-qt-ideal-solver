@@ -1,70 +1,40 @@
-# ============================================================================
-# CASE 4: GAUSSIAN BARRIER - SMOOTH POTENTIAL LANDSCAPE
-# ============================================================================
-# Physical System: Continuous potential profile (realistic approximation)
-# Models: Field emission, molecular barriers, STM junctions, nuclear alpha decay
-# Key Observable: WKB validity, reduced boundary reflections, adiabatic evolution
-# Expected Transmission: 55-65% (higher than rectangular due to smooth profile)
-# ============================================================================
+# Case 4: Gaussian Barrier
 
 scenario_name = Case 4 - Gaussian Barrier
 
-# Spatial Grid
+# Spatial grid
 nx = 2048
-x_min = -10.0         # [nm]
-x_max = 10.0          # [nm]
+x_min = -10.0         # nm
+x_max = 10.0          # nm
 
-# Temporal Integration
-t_final = 5.0         # [fs]
+# Time integration
+t_final = 5.0         # fs
 n_snapshots = 200
 adaptive_dt = true
-dt_min = 0.001        # [fs]
-dt_max = 0.01         # [fs]
+dt_min = 0.001        # fs
+dt_max = 0.01         # fs
 
-# Gaussian Barrier Configuration
+# Barrier
 barrier_type = gaussian
-barrier_height = 2.5      # [natural units] - slightly higher peak
-barrier_width = 1.5       # [nm] - σ parameter
-barrier_center = 0.0      # [nm]
+barrier_height = 2.5
+barrier_width = 1.5   # nm
+barrier_center = 0.0  # nm
 
-# Potential profile: V(x) = V₀·exp[-(x-x₀)²/(2σ²)]
-# FWHM ≈ 2.35σ ≈ 3.5 nm (effective width)
-# Gradient maximum: dV/dx|_max = V₀/(σe) ≈ 0.61 eV/nm at x = ±σ
-# Compare rectangular: infinite gradient (discontinuous, unphysical)
+# Particle
+particle_mass = 1.0   # m_e
 
-# Particle Properties
-particle_mass = 1.0       # [m_e]
+# Initial state
+x0 = -5.0             # nm
+k0 = 6.0              # nm^-1
+sigma = 0.4           # nm
 
-# Initial State
-x0 = -5.0
-k0 = 6.0              # [nm⁻¹] - higher momentum
-sigma = 0.4           # [nm]
-
-# Environmental Effects (Laboratory Conditions, ~300K)
-noise_amplitude = 0.10         # [natural units] - realistic for RT experiments
-noise_correlation_time = 0.25  # [fs] - optical phonon timescale
-decoherence_rate = 0.0015      # [fs⁻¹] - T₂ ~ 667 fs
-
-# Physical noise sources:
-# - Thermal fluctuations: kT ~ 0.026 eV at 300K
-# - Lattice phonons: ω ~ 4 THz
-# - EM field fluctuations, defect scattering
-# - Interface roughness (realistic devices)
+# Environment
+noise_amplitude = 0.10
+noise_correlation_time = 0.25   # fs
+decoherence_rate = 0.0015       # fs^-1
 
 # Output
 save_netcdf = true
 save_animation = true
 fps = 30
 dpi = 100
-
-# Smooth Potential Advantages:
-# - Reduced boundary reflections (no sharp discontinuities)
-# - Better WKB approximation accuracy
-# - More realistic for experimental systems
-# 
-# Comparison with rectangular barrier (same peak height, similar width):
-# Gaussian: T ~ 55-65% (smooth edges reduce reflection)
-# Rectangular: T ~ 40-50% (sharp boundaries increase reflection)
-# 
-# Demonstrates universal tunneling across length scales:
-# Nuclear (fm) → Atomic (Å) → Molecular (nm) → Mesoscopic (μm)

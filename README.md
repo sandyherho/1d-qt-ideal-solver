@@ -105,12 +105,6 @@ Relevant for idealized studies of quantum tunneling in:
 - **Chemical Dynamics**: Proton transfer reactions (nm scale)
 - **Nanoelectronics**: Resonant tunneling diodes, Josephson junctions (μm scale)
 
-## Performance
-
-- **Runtime**: 10-30 seconds per case (2048 grid points, 200 frames)
-- **Parallel Rendering**: ~10× faster GIF generation via multiprocessing
-- **Accuracy**: Norm error < 0.1%, energy conservation < 1%
-
 ## Citation
 
 If you use this solver in your research, please cite:

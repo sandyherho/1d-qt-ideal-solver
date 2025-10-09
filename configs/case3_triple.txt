@@ -1,64 +1,40 @@
-# ============================================================================
-# CASE 3: TRIPLE BARRIER - COUPLED QUANTUM WELLS
-# ============================================================================
-# Physical System: Two coupled quantum wells (symmetric/antisymmetric states)
-# Models: Quantum cascade structure, superlattice, artificial molecule
-# Key Observable: Energy splitting ΔE, multi-timescale dynamics
-# Expected Transmission: 50-60% (complex interference with decoherence)
-# Note: Decoherence causes expected norm decay - NOT a numerical error
-# ============================================================================
+# Case 3: Triple Barrier
 
 scenario_name = Case 3 - Triple Barrier
 
-# Spatial Grid (High Resolution)
-nx = 4096             # Doubled resolution for fine interference structure
-x_min = -15.0         # [nm]
-x_max = 15.0          # [nm] → dx ≈ 0.0073 nm
+# Spatial grid
+nx = 4096
+x_min = -15.0         # nm
+x_max = 15.0          # nm
 
-# Temporal Integration (Extended)
-t_final = 8.0         # [fs]
+# Time integration
+t_final = 8.0         # fs
 n_snapshots = 300
 adaptive_dt = true
-dt_min = 0.0005       # [fs] - tighter for complex dynamics
-dt_max = 0.008        # [fs]
+dt_min = 0.0005       # fs
+dt_max = 0.008        # fs
 
-# Triple Barrier Configuration
+# Barrier
 barrier_type = triple_barrier
-barrier_height = 2.0      # [natural units]
-barrier_width = 0.8       # [nm] - thin barriers enhance coupling
-barrier_separation = 2.5  # [nm]
+barrier_height = 2.0
+barrier_width = 0.8        # nm
+barrier_separation = 2.5   # nm
 
-# System creates two coupled wells:
-# - Left well: between barriers 1-2
-# - Right well: between barriers 2-3
-# - Energy eigenstates: ψ_sym = (ψ_L + ψ_R)/√2, ψ_anti = (ψ_L - ψ_R)/√2
-# - Level splitting: ΔE ∝ tunneling coupling
+# Particle
+particle_mass = 1.0        # m_e
 
-# Particle Properties
-particle_mass = 1.0       # [m_e]
+# Initial state
+x0 = -8.0             # nm
+k0 = 5.8              # nm^-1
+sigma = 0.4           # nm
 
-# Initial State
-x0 = -8.0
-k0 = 5.8              # [nm⁻¹] - probes multiple resonances
-sigma = 0.4           # [nm] - narrower for better energy resolution
-
-# Environmental Effects (Moderate, Room Temperature Device)
-noise_amplitude = 0.08         # [natural units] - moderate thermal noise
-noise_correlation_time = 0.15  # [fs]
-decoherence_rate = 0.002       # [fs⁻¹] - T₂ ~ 500 fs
-
-# IMPORTANT: With γ = 0.002 fs⁻¹, the wavefunction norm decays as exp(-2γt)
-# After 8 fs: norm ≈ exp(-0.032) ≈ 0.968 (3% decay is EXPECTED behavior)
-# This is NOT a numerical error - it models environmental coupling
+# Environment
+noise_amplitude = 0.08
+noise_correlation_time = 0.15   # fs
+decoherence_rate = 0.002        # fs^-1
 
 # Output
 save_netcdf = true
 save_animation = true
 fps = 35
 dpi = 110
-
-# Multi-Scale Dynamics:
-# ω_fast ~ E_n/ℏ (intra-well oscillations)
-# ω_medium ~ ΔE/ℏ (inter-well beats)
-# ω_slow ~ |coupling|²/ℏ (envelope modulation)
-# Decoherence damps oscillations: exp(-γt)

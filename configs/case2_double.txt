@@ -1,61 +1,40 @@
-# ============================================================================
-# CASE 2: DOUBLE BARRIER - RESONANT TUNNELING STRUCTURE
-# ============================================================================
-# Physical System: Quantum well between two barriers (Fabry-Pérot analog)
-# Models: Resonant tunneling diode, quantum cascade structure
-# Key Observable: Resonant transmission through quantum well states
-# Expected Transmission: 60-70% (near resonance with environmental coupling)
-# ============================================================================
+# Case 2: Double Barrier
 
 scenario_name = Case 2 - Double Barrier
 
-# Spatial Grid
+# Spatial grid
 nx = 2048
-x_min = -12.0         # [nm] - extended domain for resonant phenomena
-x_max = 12.0          # [nm]
+x_min = -12.0         # nm
+x_max = 12.0          # nm
 
-# Temporal Integration
-t_final = 6.0         # [fs] - observe quantum beats
+# Time integration
+t_final = 6.0         # fs
 n_snapshots = 250
 adaptive_dt = true
-dt_min = 0.001        # [fs]
-dt_max = 0.01         # [fs]
+dt_min = 0.001        # fs
+dt_max = 0.01         # fs
 
-# Double Barrier Configuration
+# Barrier
 barrier_type = double_barrier
-barrier_height = 2.0      # [natural units]
-barrier_width = 1.0       # [nm] - individual barrier thickness
-barrier_separation = 2.0  # [nm] - quantum well width L = 2.0 nm
+barrier_height = 2.0
+barrier_width = 1.0        # nm
+barrier_separation = 2.0   # nm
 
-# Resonant Tunneling Physics:
-# - Quantum well supports bound states with discrete energies
-# - Incident wave can couple to well states via tunneling
-# - Constructive interference at resonance → enhanced transmission
-# - Off-resonance: wave reflects from double barrier structure
+# Particle
+particle_mass = 1.0        # m_e
 
-# Particle Properties
-particle_mass = 1.0       # [m_e]
+# Initial state
+x0 = -6.0             # nm
+k0 = 5.5              # nm^-1
+sigma = 0.5           # nm
 
-# Initial State
-x0 = -6.0
-k0 = 5.5              # [nm⁻¹] - incident momentum
-sigma = 0.5           # [nm]
-
-# Environmental Effects (Clean Device at 4K)
-noise_amplitude = 0.05         # [natural units] - weak thermal noise
-noise_correlation_time = 0.2   # [fs] - acoustic phonon timescale
-decoherence_rate = 0.001       # [fs⁻¹] - T₂ ~ 1 ps
-
-# Noise broadens resonances and damps quantum beats
-# Long coherence time preserves resonant behavior
+# Environment
+noise_amplitude = 0.05
+noise_correlation_time = 0.2   # fs
+decoherence_rate = 0.001       # fs^-1
 
 # Output
 save_netcdf = true
 save_animation = true
 fps = 30
 dpi = 100
-
-# Resonant Tunneling Characteristics:
-# - High transmission when incident energy matches well states
-# - Sharp resonance peaks in T(E) spectrum
-# - Quantum beats between symmetric/antisymmetric combinations
