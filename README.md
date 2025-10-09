@@ -1,5 +1,6 @@
 # `1d-qt-ideal-solver`: Idealized 1D Quantum Tunneling Solver
 
+[![DOI](https://zenodo.org/badge/1072081371.svg)](https://doi.org/10.5281/zenodo.17299767)
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Numba](https://img.shields.io/badge/accelerated-numba-orange.svg)](https://numba.pydata.org/)
