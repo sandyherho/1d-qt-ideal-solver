@@ -41,7 +41,7 @@ pip install 1d-qt-ideal-solver
 
 **From source:**
 ```bash
-git clone https://github.com/yourusername/1d-qt-ideal-solver.git
+git clone https://github.com/sandyherho/1d-qt-ideal-solver.git
 cd 1d-qt-ideal-solver
 pip install -e .
 ```
