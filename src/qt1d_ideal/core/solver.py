@@ -1,6 +1,5 @@
 """
 1D Quantum Tunneling Solver with Adaptive Time Stepping and Stochastic Noise
-FIXED: Corrected kinetic energy calculation for proper FFT normalization
 """
 
 import numpy as np
@@ -233,13 +232,19 @@ class QuantumTunneling1D:
                     print(f"\n  ERROR: {error_msg}")
                 break
             
-            # Norm check
+            # Norm check - FIXED: Don't flag violations when decoherence is enabled
             current_norm = np.sqrt(np.sum(np.abs(psi)**2) * self.dx)
             norm_error = abs(current_norm - 1.0)
-            if norm_error > 0.01:
+            
+            # Only flag as violation if no decoherence (decoherence causes expected norm decay)
+            if norm_error > 0.01 and decoherence_rate == 0.0:
                 norm_violations.append((t, norm_error))
                 if norm_error > max_norm_error:
                     max_norm_error = norm_error
+            
+            # Track max error even with decoherence (for diagnostic purposes)
+            if norm_error > max_norm_error:
+                max_norm_error = norm_error
             
             # Energy check (only if no noise/decoherence)
             if not noise_enabled and decoherence_rate == 0.0 and n_steps % 100 == 0 and n_steps > 0:
@@ -247,7 +252,7 @@ class QuantumTunneling1D:
                 E_current = compute_energy(psi, psi_k_check, self.k, V, 
                                           self.dx, particle_mass)
                 energy_error = abs((E_current - E_initial) / E_initial)
-                if energy_error > 0.01:  # 1% threshold (now achievable with fix!)
+                if energy_error > 0.01:  # 1% threshold
                     energy_violations.append((t, energy_error))
                     if energy_error > max_energy_error:
                         max_energy_error = energy_error
@@ -281,7 +286,7 @@ class QuantumTunneling1D:
         if show_progress:
             pbar.close()
         
-        # Log violations
+        # Log violations (only for truly unexpected violations)
         if norm_violations:
             warning = f"Norm violated {len(norm_violations)} times (max: {max_norm_error:.4f})"
             if self.logger:

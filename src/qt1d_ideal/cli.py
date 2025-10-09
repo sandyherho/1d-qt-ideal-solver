@@ -23,13 +23,11 @@ def print_header():
     print("\n" + "=" * 70)
     print(" " * 15 + "1D QUANTUM TUNNELING SOLVER")
     print(" " * 20 + "WITH STOCHASTIC NOISE")
-    print(" " * 25 + "Version 0.0.1")
+    print(" " * 25 + "Version 0.0.2")
     print("=" * 70)
     print("\n  Authors: Siti N. Kaban, Sandy H. S. Herho,")
     print("           Sonny Prayogo, Iwan P. Anwar")
     print("\n  License: MIT License")
-    print("  " + "─" * 66)
-    print("  Educational tool for simulating quantum tunneling phenomena")
     print("=" * 70 + "\n")
 
 

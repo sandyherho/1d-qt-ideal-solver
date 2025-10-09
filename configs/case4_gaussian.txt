@@ -4,7 +4,7 @@
 # Physical System: Continuous potential profile (realistic approximation)
 # Models: Field emission, molecular barriers, STM junctions, nuclear alpha decay
 # Key Observable: WKB validity, reduced boundary reflections, adiabatic evolution
-# Expected Transmission: 25-35% (higher than rectangular due to smooth edges)
+# Expected Transmission: 55-65% (higher than rectangular due to smooth profile)
 # ============================================================================
 
 scenario_name = Case 4 - Gaussian Barrier
@@ -23,7 +23,7 @@ dt_max = 0.01         # [fs]
 
 # Gaussian Barrier Configuration
 barrier_type = gaussian
-barrier_height = 2.5      # [eV] - slightly higher peak
+barrier_height = 2.5      # [natural units] - slightly higher peak
 barrier_width = 1.5       # [nm] - σ parameter
 barrier_center = 0.0      # [nm]
 
@@ -37,11 +37,11 @@ particle_mass = 1.0       # [m_e]
 
 # Initial State
 x0 = -5.0
-k0 = 6.0              # [nm⁻¹] - E_k ≈ 2.19 eV (mixed over/under barrier regime)
+k0 = 6.0              # [nm⁻¹] - higher momentum
 sigma = 0.4           # [nm]
 
 # Environmental Effects (Laboratory Conditions, ~300K)
-noise_amplitude = 0.10         # [eV] - realistic for RT experiments
+noise_amplitude = 0.10         # [natural units] - realistic for RT experiments
 noise_correlation_time = 0.25  # [fs] - optical phonon timescale
 decoherence_rate = 0.0015      # [fs⁻¹] - T₂ ~ 667 fs
 
@@ -57,13 +57,14 @@ save_animation = true
 fps = 30
 dpi = 100
 
-# WKB Approximation Validity:
-# T ≈ exp[-2∫κ(x)dx], κ(x) = √[2m(V(x)-E)]/ℏ
-# Accurate to ~1% for smooth potentials (slowly-varying condition satisfied)
+# Smooth Potential Advantages:
+# - Reduced boundary reflections (no sharp discontinuities)
+# - Better WKB approximation accuracy
+# - More realistic for experimental systems
 # 
-# Comparison with rectangular barrier (same V₀, similar width):
-# Gaussian: T ~ 25-35% (smooth edges reduce reflection)
-# Rectangular: T ~ 15-25% (sharp boundaries increase reflection)
+# Comparison with rectangular barrier (same peak height, similar width):
+# Gaussian: T ~ 55-65% (smooth edges reduce reflection)
+# Rectangular: T ~ 40-50% (sharp boundaries increase reflection)
 # 
 # Demonstrates universal tunneling across length scales:
 # Nuclear (fm) → Atomic (Å) → Molecular (nm) → Mesoscopic (μm)

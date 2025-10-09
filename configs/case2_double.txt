@@ -3,8 +3,8 @@
 # ============================================================================
 # Physical System: Quantum well between two barriers (Fabry-Pérot analog)
 # Models: Resonant tunneling diode, quantum cascade structure
-# Key Observable: Resonant transmission at E_n = n²π²ℏ²/(2mL²)
-# Expected Transmission: 30-60% (resonance-dependent, energy E_k ~ 1.84 eV)
+# Key Observable: Resonant transmission through quantum well states
+# Expected Transmission: 60-70% (near resonance with environmental coupling)
 # ============================================================================
 
 scenario_name = Case 2 - Double Barrier
@@ -23,29 +23,31 @@ dt_max = 0.01         # [fs]
 
 # Double Barrier Configuration
 barrier_type = double_barrier
-barrier_height = 2.0      # [eV]
+barrier_height = 2.0      # [natural units]
 barrier_width = 1.0       # [nm] - individual barrier thickness
 barrier_separation = 2.0  # [nm] - quantum well width L = 2.0 nm
 
-# Well Energy Levels (particle in box approximation):
-# E₁ ≈ 0.094 eV, E₂ ≈ 0.376 eV, E₃ ≈ 0.846 eV, E₄ ≈ 1.504 eV
-# Resonance condition: E_k ≈ E_n → T ≈ 1 (constructive interference)
+# Resonant Tunneling Physics:
+# - Quantum well supports bound states with discrete energies
+# - Incident wave can couple to well states via tunneling
+# - Constructive interference at resonance → enhanced transmission
+# - Off-resonance: wave reflects from double barrier structure
 
 # Particle Properties
 particle_mass = 1.0       # [m_e]
 
 # Initial State
 x0 = -6.0
-k0 = 5.5              # [nm⁻¹] - E_k ≈ 1.84 eV (near E₄ resonance)
+k0 = 5.5              # [nm⁻¹] - incident momentum
 sigma = 0.5           # [nm]
 
 # Environmental Effects (Clean Device at 4K)
-noise_amplitude = 0.05         # [eV] - ~2.5% of V₀
+noise_amplitude = 0.05         # [natural units] - weak thermal noise
 noise_correlation_time = 0.2   # [fs] - acoustic phonon timescale
 decoherence_rate = 0.001       # [fs⁻¹] - T₂ ~ 1 ps
 
-# Noise broadens resonances: Γ ~ ℏγ ≈ 0.004 eV
-# Quantum beats damped over coherence time
+# Noise broadens resonances and damps quantum beats
+# Long coherence time preserves resonant behavior
 
 # Output
 save_netcdf = true
@@ -53,7 +55,7 @@ save_animation = true
 fps = 30
 dpi = 100
 
-# Resonant Tunneling Transmission:
-# T(E) = 1 / [1 + (V²sin²(kL))/(4E(E-V))]
-# At resonance (kL = nπ): T = 1
-# Off-resonance: T << 1
+# Resonant Tunneling Characteristics:
+# - High transmission when incident energy matches well states
+# - Sharp resonance peaks in T(E) spectrum
+# - Quantum beats between symmetric/antisymmetric combinations

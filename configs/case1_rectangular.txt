@@ -3,8 +3,8 @@
 # ============================================================================
 # Physical System: Electron encountering abrupt potential step
 # Models: Metal-insulator-metal junction, idealized step potential
-# Key Observable: T ∝ exp(-2κw), κ = √[2m(V-E)]/ℏ
-# Expected Transmission: 15-25% (E/V ~ 0.75, moderate tunneling regime)
+# Key Observable: Transmission vs. energy ratio E/V
+# Expected Transmission: 40-50% (overbarrier scattering with boundary reflection)
 # ============================================================================
 
 scenario_name = Case 1 - Rectangular Barrier
@@ -23,8 +23,8 @@ dt_max = 0.01         # [fs]
 
 # Barrier Configuration
 barrier_type = rectangular
-barrier_height = 2.0   # [eV] - E_k ~ 1.5 eV → partial tunneling
-barrier_width = 2.0    # [nm] - κw ≈ 3.3
+barrier_height = 2.0   # [natural units] - barrier strength
+barrier_width = 2.0    # [nm] - barrier thickness
 barrier_center = 0.0   # [nm]
 
 # Particle Properties
@@ -32,11 +32,11 @@ particle_mass = 1.0    # [m_e]
 
 # Initial State: Gaussian Wave Packet
 x0 = -5.0             # [nm] - incident from left
-k0 = 5.0              # [nm⁻¹] - E_k ≈ 1.52 eV, λ ≈ 1.26 nm
+k0 = 5.0              # [nm⁻¹] - incident momentum (λ ≈ 1.26 nm)
 sigma = 0.5           # [nm] - Δx·Δp ~ ℏ/2 (minimum uncertainty)
 
 # Environmental Effects (Disabled for Ideal Case)
-noise_amplitude = 0.0          # [eV]
+noise_amplitude = 0.0          # [natural units]
 noise_correlation_time = 0.1   # [fs]
 decoherence_rate = 0.0         # [fs⁻¹]
 

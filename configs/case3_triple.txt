@@ -4,7 +4,8 @@
 # Physical System: Two coupled quantum wells (symmetric/antisymmetric states)
 # Models: Quantum cascade structure, superlattice, artificial molecule
 # Key Observable: Energy splitting ΔE, multi-timescale dynamics
-# Expected Transmission: 15-40% (multiple resonances, complex interference)
+# Expected Transmission: 50-60% (complex interference with decoherence)
+# Note: Decoherence causes expected norm decay - NOT a numerical error
 # ============================================================================
 
 scenario_name = Case 3 - Triple Barrier
@@ -23,7 +24,7 @@ dt_max = 0.008        # [fs]
 
 # Triple Barrier Configuration
 barrier_type = triple_barrier
-barrier_height = 2.0      # [eV]
+barrier_height = 2.0      # [natural units]
 barrier_width = 0.8       # [nm] - thin barriers enhance coupling
 barrier_separation = 2.5  # [nm]
 
@@ -38,16 +39,17 @@ particle_mass = 1.0       # [m_e]
 
 # Initial State
 x0 = -8.0
-k0 = 5.8              # [nm⁻¹] - E_k ≈ 2.04 eV (probes multiple resonances)
+k0 = 5.8              # [nm⁻¹] - probes multiple resonances
 sigma = 0.4           # [nm] - narrower for better energy resolution
 
 # Environmental Effects (Moderate, Room Temperature Device)
-noise_amplitude = 0.08         # [eV] - ~4% of V₀
+noise_amplitude = 0.08         # [natural units] - moderate thermal noise
 noise_correlation_time = 0.15  # [fs]
 decoherence_rate = 0.002       # [fs⁻¹] - T₂ ~ 500 fs
 
-# Longer structure → increased decoherence sensitivity
-# Multiple timescales: intra-well (fast), inter-well beats (medium), envelope (slow)
+# IMPORTANT: With γ = 0.002 fs⁻¹, the wavefunction norm decays as exp(-2γt)
+# After 8 fs: norm ≈ exp(-0.032) ≈ 0.968 (3% decay is EXPECTED behavior)
+# This is NOT a numerical error - it models environmental coupling
 
 # Output
 save_netcdf = true

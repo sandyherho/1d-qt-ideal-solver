@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "1d-qt-ideal-solver"
-version = "0.0.1"
+version = "0.0.2"
 description = "Simplified 1D quantum tunneling solver with 4 classic test cases"
 authors = [
     "Siti N. Kaban",
