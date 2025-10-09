@@ -1,5 +1,6 @@
 """
 1D Quantum Tunneling Solver with Adaptive Time Stepping and Stochastic Noise
+FIXED: Corrected kinetic energy calculation for proper FFT normalization
 """
 
 import numpy as np
@@ -48,22 +49,28 @@ def estimate_wavefunction_change(psi_curr: np.ndarray, psi_prev: np.ndarray,
 
 @jit(nopython=True, cache=True)
 def compute_energy(psi: np.ndarray, psi_k: np.ndarray, k: np.ndarray, 
-                   V: np.ndarray, dx: float, m: float, k_max_input: float) -> float:
+                   V: np.ndarray, dx: float, m: float) -> float:
     """
-    Compute total energy with adaptive k-cutoff based on wavepacket.
-    Only sum over physically relevant k modes.
-    """
-    # Use adaptive cutoff based on actual wavepacket
-    k_cutoff = max(k_max_input * 3.0, 20.0)  # 3x typical k, minimum 20
+    Compute total energy with CORRECT FFT normalization.
     
-    # Kinetic energy
+    For scipy.fftpack FFT normalization:
+    - Position space: ∫|ψ(x)|²dx = ∑|ψ_n|² * dx
+    - Momentum space: ψ̃(k) = ψ_k[fft] * dx (physical Fourier transform)
+    - Parseval: ∑|ψ_n|² * dx = ∑|ψ_k|² * (dx/N)
+    - Kinetic: T = ∑(k²/2m)|ψ_k|² * (dx/N)
+    
+    FIXED: Changed dx/(2π) to dx/N for correct energy conservation.
+    """
+    N = len(psi_k)
+    
+    # Kinetic energy: T = ∑(k²/2m)|ψ_k|² * (dx/N)
+    # This is the CORRECT normalization for scipy FFT
     kinetic = 0.0
-    for i in range(len(psi_k)):
-        if np.abs(k[i]) < k_cutoff:
-            kinetic += (k[i]**2 / (2.0 * m)) * np.abs(psi_k[i])**2
-    kinetic = kinetic * dx / (2.0 * np.pi)
+    for i in range(N):
+        kinetic += (k[i]**2 / (2.0 * m)) * np.abs(psi_k[i])**2
+    kinetic = kinetic * dx / N  # FIXED: was dx/(2π), now dx/N
     
-    # Potential energy
+    # Potential energy: V = ∫V(x)|ψ(x)|²dx = ∑V_n|ψ_n|² * dx
     potential = 0.0
     for i in range(len(psi)):
         potential += V[i] * np.abs(psi[i])**2
@@ -145,11 +152,6 @@ class QuantumTunneling1D:
         noise_potential = np.zeros(self.nx)
         noise_enabled = noise_amplitude > 0
         
-        # Estimate k0 from initial wavefunction for adaptive energy check
-        psi0_k = fft(psi0)
-        k_weights = np.abs(psi0_k)**2
-        k0_estimate = np.sqrt(np.sum(k_weights * self.k**2) / np.sum(k_weights))
-        
         if dt_initial is None:
             k_max = np.max(np.abs(self.k))
             E_k_max = k_max**2 / (2.0 * particle_mass)
@@ -184,7 +186,7 @@ class QuantumTunneling1D:
         
         # Initial energy
         psi_k = fft(psi)
-        E_initial = compute_energy(psi, psi_k, self.k, V, self.dx, particle_mass, k0_estimate)
+        E_initial = compute_energy(psi, psi_k, self.k, V, self.dx, particle_mass)
         
         norm_violations = []
         energy_violations = []
@@ -239,22 +241,21 @@ class QuantumTunneling1D:
                 if norm_error > max_norm_error:
                     max_norm_error = norm_error
             
-            # Energy check (less frequent, only if no noise)
-            if not noise_enabled and n_steps % 200 == 0 and n_steps > 0:
+            # Energy check (only if no noise/decoherence)
+            if not noise_enabled and decoherence_rate == 0.0 and n_steps % 100 == 0 and n_steps > 0:
                 psi_k_check = fft(psi)
                 E_current = compute_energy(psi, psi_k_check, self.k, V, 
-                                          self.dx, particle_mass, k0_estimate)
+                                          self.dx, particle_mass)
                 energy_error = abs((E_current - E_initial) / E_initial)
-                if energy_error > 0.03:  # 3% threshold
+                if energy_error > 0.01:  # 1% threshold (now achievable with fix!)
                     energy_violations.append((t, energy_error))
                     if energy_error > max_energy_error:
                         max_energy_error = energy_error
             
-            # Adaptive time stepping (more aggressive)
+            # Adaptive time stepping
             if self.adaptive_dt and n_steps > 0:
                 change_rate = estimate_wavefunction_change(psi, psi_prev, self.dx)
                 
-                # Much more relaxed criteria
                 if change_rate > tolerance * 5.0:
                     dt = dt * 0.95
                 elif change_rate < tolerance * 0.05:
