@@ -1,23 +1,6 @@
 #!/usr/bin/env python
 """
 Command Line Interface for 1D Quantum Tunneling Solver
-
-Provides user-friendly command-line interface for running quantum tunneling
-simulations with predefined test cases or custom configurations.
-
-Usage Examples:
-    qt1d-simulate case1              # Run rectangular barrier case
-    qt1d-simulate case2 --cores 8    # Use 8 CPU cores
-    qt1d-simulate --all              # Run all 4 test cases
-    qt1d-simulate -c custom.txt      # Use custom config file
-    qt1d-simulate case1 -q           # Quiet mode (minimal output)
-
-Features:
-    - Pre-configured test cases (4 scenarios)
-    - Custom configuration file support
-    - Multi-core processing
-    - Verbose/quiet output modes
-    - Comprehensive error handling
 """
 
 import argparse
@@ -36,33 +19,65 @@ from .utils.timer import Timer
 
 
 def print_header():
+    """Print ASCII art header with version and authors."""
+    print("\n" + "=" * 70)
+    print(" " * 15 + "1D QUANTUM TUNNELING SOLVER")
+    print(" " * 20 + "WITH STOCHASTIC NOISE")
+    print(" " * 25 + "Version 0.0.1")
+    print("=" * 70)
+    print("\n  Authors: Siti N. Kaban, Sandy H. S. Herho,")
+    print("           Sonny Prayogo, Iwan P. Anwar")
+    print("\n  License: MIT License")
+    print("  " + "─" * 66)
+    print("  Educational tool for simulating quantum tunneling phenomena")
+    print("=" * 70 + "\n")
+
+
+def normalize_scenario_name(scenario_name: str) -> str:
     """
-    Print ASCII art header with version information.
+    Convert scenario name to clean filename format.
+    
+    Examples:
+        "Case 1 - Rectangular Barrier" -> "case1_rectangular"
+        "Case 2 - Double Barrier" -> "case2_double"
+    
+    Args:
+        scenario_name: Original scenario name
+        
+    Returns:
+        Clean filename-safe string
     """
-    print("\n" + "=" * 60)
-    print(" " * 10 + "1D QUANTUM TUNNELING SOLVER")
-    print(" " * 15 + "WITH STOCHASTIC NOISE")
-    print(" " * 20 + "Version 0.0.1")
-    print("=" * 60 + "\n")
+    # Convert to lowercase
+    clean = scenario_name.lower()
+    
+    # Replace common separators with single underscore
+    clean = clean.replace(' - ', '_')
+    clean = clean.replace('-', '_')
+    clean = clean.replace(' ', '_')
+    
+    # Remove multiple consecutive underscores
+    while '__' in clean:
+        clean = clean.replace('__', '_')
+    
+    # Remove 'case_' prefix if present and extract case number
+    if clean.startswith('case_'):
+        # "case_1_rectangular_barrier" -> "case1_rectangular"
+        parts = clean.split('_')
+        if len(parts) >= 2 and parts[1].isdigit():
+            case_num = parts[1]
+            rest = '_'.join(parts[2:])
+            # Take first meaningful word after case number
+            rest_words = [w for w in rest.split('_') if len(w) > 2]
+            if rest_words:
+                clean = f"case{case_num}_{rest_words[0]}"
+            else:
+                clean = f"case{case_num}"
+    
+    return clean
 
 
 def create_potential(config: dict, solver: QuantumTunneling1D) -> np.ndarray:
-    """
-    Create potential barrier based on configuration.
-    
-    Supports:
-        - rectangular: Sharp-edged barrier
-        - gaussian: Smooth barrier
-        - double_barrier: Two barriers (resonant tunneling)
-        - triple_barrier: Three barriers (complex interference)
-    
-    Args:
-        config: Configuration dictionary
-        solver: QuantumTunneling1D instance (provides spatial grid)
-    
-    Returns:
-        Potential array V(x) [eV]
-    """
+    """Create potential barrier based on configuration."""
     barrier_type = config.get('barrier_type', 'rectangular')
     
     if barrier_type == 'rectangular':
@@ -90,48 +105,25 @@ def create_potential(config: dict, solver: QuantumTunneling1D) -> np.ndarray:
             separation=config.get('barrier_separation', 2.5))
     
     else:
-        # Default to rectangular if unknown type
         print(f"  WARNING: Unknown barrier type '{barrier_type}', using rectangular")
         return solver.rectangular_barrier(2.0, 2.0)
 
 
 def run_scenario(config: dict, output_dir: str = "outputs", 
                 verbose: bool = True, n_cores: int = None):
-    """
-    Run a complete quantum tunneling simulation scenario.
-    
-    Workflow:
-        1. Initialize solver and logger
-        2. Set up initial wavefunction and potential
-        3. Run time evolution
-        4. Save results to NetCDF
-        5. Create animation (optional)
-        6. Log timing and results
-    
-    Args:
-        config: Configuration dictionary with all parameters
-        output_dir: Directory for saving outputs
-        verbose: Print progress information
-        n_cores: Number of CPU cores (None = use all)
-    
-    Raises:
-        Exception: If simulation fails (logged and re-raised)
-    """
+    """Run a complete quantum tunneling simulation scenario."""
     scenario_name = config.get('scenario_name', 'simulation')
+    
+    # Normalize scenario name for filenames (no timestamps, clean format)
+    clean_name = normalize_scenario_name(scenario_name)
     
     if verbose:
         print(f"\n{'=' * 60}")
         print(f"SCENARIO: {scenario_name}")
         print(f"{'=' * 60}")
     
-    # ====================================================================
-    # INITIALIZE LOGGER AND TIMER
-    # ====================================================================
-    logger = SimulationLogger(
-        scenario_name.lower().replace(' ', '_').replace('-', '_'),
-        "logs", 
-        verbose
-    )
+    # Initialize logger and timer
+    logger = SimulationLogger(clean_name, "logs", verbose)
     timer = Timer()
     timer.start("total")
     
@@ -163,15 +155,12 @@ def run_scenario(config: dict, output_dir: str = "outputs",
             if verbose:
                 print("\n[2/5] Setting up initial state...")
             
-            # Create Gaussian wave packet
             wf = GaussianWavePacket(
-                x0=config.get('x0', -5.0),     # Initial position
-                k0=config.get('k0', 5.0),       # Initial momentum
-                sigma=config.get('sigma', 0.5)  # Wavepacket width
+                x0=config.get('x0', -5.0),
+                k0=config.get('k0', 5.0),
+                sigma=config.get('sigma', 0.5)
             )
             psi0 = wf(solver.x)
-            
-            # Create potential barrier
             V = create_potential(config, solver)
         
         # ================================================================
@@ -190,16 +179,13 @@ def run_scenario(config: dict, output_dir: str = "outputs",
                 n_snapshots=config.get('n_snapshots', 200),
                 particle_mass=config.get('particle_mass', 1.0),
                 show_progress=verbose,
-                # Stochastic noise parameters
                 noise_amplitude=config.get('noise_amplitude', 0.0),
                 noise_correlation_time=config.get('noise_correlation_time', 0.1),
                 decoherence_rate=config.get('decoherence_rate', 0.0)
             )
             
-            # Log results with validation
             logger.log_results(result)
             
-            # Print key results to console
             if verbose:
                 T = result['transmission_coefficient']
                 R = result['reflection_coefficient']
@@ -215,10 +201,8 @@ def run_scenario(config: dict, output_dir: str = "outputs",
                 if verbose:
                     print("\n[4/5] Saving NetCDF data...")
                 
-                # Create filename from scenario name
-                filename = f"{scenario_name.lower().replace(' ', '_').replace('-', '_')}.nc"
-                
-                # Save to NetCDF format
+                # Use clean filename
+                filename = f"{clean_name}.nc"
                 DataHandler.save_netcdf(filename, result, config, output_dir)
                 
                 if verbose:
@@ -232,10 +216,9 @@ def run_scenario(config: dict, output_dir: str = "outputs",
                 if verbose:
                     print("\n[5/5] Creating animation...")
                 
-                # Create filename from scenario name
-                filename = f"{scenario_name.lower().replace(' ', '_').replace('-', '_')}.gif"
+                # Use clean filename
+                filename = f"{clean_name}.gif"
                 
-                # Generate animated GIF
                 Animator.create_gif(
                     result, 
                     filename, 
@@ -259,7 +242,6 @@ def run_scenario(config: dict, output_dir: str = "outputs",
             print("✓ SIMULATION COMPLETED SUCCESSFULLY")
             print(f"  Total time: {timer.get_times()['total']:.2f} s")
             
-            # Show number of warnings/errors
             if logger.warnings:
                 print(f"  Warnings: {len(logger.warnings)}")
             if logger.errors:
@@ -268,42 +250,27 @@ def run_scenario(config: dict, output_dir: str = "outputs",
             print(f"{'=' * 60}\n")
     
     except Exception as e:
-        # ================================================================
-        # ERROR HANDLING
-        # ================================================================
-        # Log error
         logger.error(f"Simulation failed: {str(e)}")
         
-        # Print error box
         if verbose:
             print(f"\n{'=' * 60}")
             print(f"✗ SIMULATION FAILED")
             print(f"  Error: {str(e)}")
             print(f"{'=' * 60}\n")
         
-        # Re-raise exception for debugging
         raise
     
     finally:
-        # Always finalize logger (writes summary)
         logger.finalize()
 
 
 def main():
-    """
-    Main entry point for command-line interface.
-    
-    Parses arguments and dispatches to appropriate scenario runner.
-    """
-    # ====================================================================
-    # ARGUMENT PARSER SETUP
-    # ====================================================================
+    """Main entry point for command-line interface."""
     parser = argparse.ArgumentParser(
         description='1D Quantum Tunneling Solver with Stochastic Noise',
         epilog='Example: qt1d-simulate case1 --cores 8'
     )
     
-    # Positional argument: which case to run
     parser.add_argument(
         'case', 
         nargs='?',
@@ -311,7 +278,6 @@ def main():
         help='Test case to run (1=rectangular, 2=double, 3=triple, 4=gaussian)'
     )
     
-    # Optional arguments
     parser.add_argument(
         '--config', '-c', 
         type=str, 
@@ -344,13 +310,9 @@ def main():
         help='Quiet mode (minimal output)'
     )
     
-    # Parse arguments
     args = parser.parse_args()
     verbose = not args.quiet
     
-    # ====================================================================
-    # PRINT HEADER (unless quiet mode)
-    # ====================================================================
     if verbose:
         print_header()
     
@@ -358,23 +320,18 @@ def main():
     # DISPATCH TO APPROPRIATE MODE
     # ====================================================================
     
-    # MODE 1: Custom configuration file
     if args.config:
         config = ConfigManager.load(args.config)
         run_scenario(config, args.output_dir, verbose, args.cores)
     
-    # MODE 2: Run all test cases
     elif args.all:
         configs_dir = Path(__file__).parent.parent.parent / 'configs'
-        
-        # Find all case*.txt files
         config_files = sorted(configs_dir.glob('case*.txt'))
         
         if not config_files:
             print("ERROR: No configuration files found in configs/")
             sys.exit(1)
         
-        # Run each case sequentially
         for i, cfg_file in enumerate(config_files, 1):
             if verbose:
                 print(f"\n[Case {i}/{len(config_files)}] Running {cfg_file.stem}...")
@@ -382,9 +339,7 @@ def main():
             config = ConfigManager.load(str(cfg_file))
             run_scenario(config, args.output_dir, verbose, args.cores)
     
-    # MODE 3: Run specific case
     elif args.case:
-        # Map case shorthand to full config filename
         case_map = {
             'case1': 'case1_rectangular',
             'case2': 'case2_double',
@@ -396,7 +351,6 @@ def main():
         configs_dir = Path(__file__).parent.parent.parent / 'configs'
         cfg_file = configs_dir / f'{cfg_name}.txt'
         
-        # Check if config file exists
         if cfg_file.exists():
             config = ConfigManager.load(str(cfg_file))
             run_scenario(config, args.output_dir, verbose, args.cores)
@@ -404,14 +358,10 @@ def main():
             print(f"ERROR: Configuration file not found: {cfg_file}")
             sys.exit(1)
     
-    # MODE 4: No arguments - show help
     else:
         parser.print_help()
         sys.exit(0)
 
 
-# ====================================================================
-# ENTRY POINT
-# ====================================================================
 if __name__ == '__main__':
     main()
