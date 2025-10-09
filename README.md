@@ -52,17 +52,6 @@ qt1d-simulate --all
 qt1d-simulate --config myconfig.txt
 ```
 
-## Test Cases
-
-| Case | System | Physics | Expected $T$ |
-|------|--------|---------|-------------|
-| **1** | Rectangular barrier | Classic tunneling: $T \propto e^{-2\kappa w}$ | 15-25% |
-| **2** | Double barrier | Resonant tunneling: $T(E_n) \approx 1$ | 30-60% |
-| **3** | Triple barrier | Coupled quantum wells, beating | 15-40% |
-| **4** | Gaussian barrier | Smooth WKB regime | 25-35% |
-
-**Complexity Progression**: Case 1 (fundamental) → Case 4 (multi-scale dynamics)
-
 ## Python API
 
 ```python
@@ -122,11 +111,6 @@ noise_amplitude = 0.0      # [eV] (disabled for ideal case)
 decoherence_rate = 0.0     # [fs⁻¹]
 ```
 
-## Performance
-
-- **Typical Runtime**: 10-30 seconds per case (2048 grid points, 200 frames)
-- **Parallel Rendering**: ~10× faster animation generation (multiprocessing)
-- **Conservation Accuracy**: Norm error < 0.1%, energy error < 1% (fixed FFT normalization)
 
 ## Physical Context
 
