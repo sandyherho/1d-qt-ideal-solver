@@ -1,6 +1,6 @@
 """1D Quantum Tunneling Solver - Idealized Version"""
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __author__ = "Siti N. Kaban, Sandy H. S. Herho, Sonny Prayogo, Iwan P. Anwar"
 
 from .core.solver import QuantumTunneling1D
