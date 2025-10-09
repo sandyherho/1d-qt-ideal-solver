@@ -18,8 +18,8 @@ x_max = 10.0          # [nm] → dx ≈ 0.0098 nm
 t_final = 5.0         # [fs] - complete barrier interaction
 n_snapshots = 200     # Temporal resolution: 0.025 fs/frame
 adaptive_dt = true
-dt_min = 0.0001      # [fs]
-dt_max = 0.01        # [fs]
+dt_min = 0.001        # [fs] - 1 attosecond minimum
+dt_max = 0.01         # [fs]
 
 # Barrier Configuration
 barrier_type = rectangular

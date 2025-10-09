@@ -18,7 +18,7 @@ x_max = 15.0          # [nm] → dx ≈ 0.0073 nm
 t_final = 8.0         # [fs]
 n_snapshots = 300
 adaptive_dt = true
-dt_min = 0.00005      # [fs] - tighter for stability
+dt_min = 0.0005       # [fs] - tighter for complex dynamics
 dt_max = 0.008        # [fs]
 
 # Triple Barrier Configuration

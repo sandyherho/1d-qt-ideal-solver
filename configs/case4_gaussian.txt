@@ -18,8 +18,8 @@ x_max = 10.0          # [nm]
 t_final = 5.0         # [fs]
 n_snapshots = 200
 adaptive_dt = true
-dt_min = 0.0001      # [fs]
-dt_max = 0.01        # [fs]
+dt_min = 0.001        # [fs]
+dt_max = 0.01         # [fs]
 
 # Gaussian Barrier Configuration
 barrier_type = gaussian

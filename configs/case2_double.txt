@@ -18,8 +18,8 @@ x_max = 12.0          # [nm]
 t_final = 6.0         # [fs] - observe quantum beats
 n_snapshots = 250
 adaptive_dt = true
-dt_min = 0.0001      # [fs]
-dt_max = 0.01        # [fs]
+dt_min = 0.001        # [fs]
+dt_max = 0.01         # [fs]
 
 # Double Barrier Configuration
 barrier_type = double_barrier
