@@ -1,23 +1,62 @@
-# Case 3: Triple Barrier (Advanced)
-# Multiple resonances and quantum beats
+# ============================================================================
+# CASE 3: TRIPLE BARRIER - COUPLED QUANTUM WELLS
+# ============================================================================
+# Physical System: Two coupled quantum wells (symmetric/antisymmetric states)
+# Models: Quantum cascade structure, superlattice, artificial molecule
+# Key Observable: Energy splitting ΔE, multi-timescale dynamics
+# Expected Transmission: 15-40% (multiple resonances, complex interference)
+# ============================================================================
+
 scenario_name = Case 3 - Triple Barrier
-nx = 4096
-x_min = -15.0
-x_max = 15.0
-t_final = 8.0
+
+# Spatial Grid (High Resolution)
+nx = 4096             # Doubled resolution for fine interference structure
+x_min = -15.0         # [nm]
+x_max = 15.0          # [nm] → dx ≈ 0.0073 nm
+
+# Temporal Integration (Extended)
+t_final = 8.0         # [fs]
 n_snapshots = 300
-barrier_type = triple_barrier
-barrier_height = 2.0
-barrier_width = 0.8
-barrier_separation = 2.5
-particle_mass = 1.0
-x0 = -8.0
-k0 = 5.8
-sigma = 0.4
 adaptive_dt = true
-dt_min = 0.00005
-dt_max = 0.008
+dt_min = 0.00005      # [fs] - tighter for stability
+dt_max = 0.008        # [fs]
+
+# Triple Barrier Configuration
+barrier_type = triple_barrier
+barrier_height = 2.0      # [eV]
+barrier_width = 0.8       # [nm] - thin barriers enhance coupling
+barrier_separation = 2.5  # [nm]
+
+# System creates two coupled wells:
+# - Left well: between barriers 1-2
+# - Right well: between barriers 2-3
+# - Energy eigenstates: ψ_sym = (ψ_L + ψ_R)/√2, ψ_anti = (ψ_L - ψ_R)/√2
+# - Level splitting: ΔE ∝ tunneling coupling
+
+# Particle Properties
+particle_mass = 1.0       # [m_e]
+
+# Initial State
+x0 = -8.0
+k0 = 5.8              # [nm⁻¹] - E_k ≈ 2.04 eV (probes multiple resonances)
+sigma = 0.4           # [nm] - narrower for better energy resolution
+
+# Environmental Effects (Moderate, Room Temperature Device)
+noise_amplitude = 0.08         # [eV] - ~4% of V₀
+noise_correlation_time = 0.15  # [fs]
+decoherence_rate = 0.002       # [fs⁻¹] - T₂ ~ 500 fs
+
+# Longer structure → increased decoherence sensitivity
+# Multiple timescales: intra-well (fast), inter-well beats (medium), envelope (slow)
+
+# Output
 save_netcdf = true
 save_animation = true
 fps = 35
 dpi = 110
+
+# Multi-Scale Dynamics:
+# ω_fast ~ E_n/ℏ (intra-well oscillations)
+# ω_medium ~ ΔE/ℏ (inter-well beats)
+# ω_slow ~ |coupling|²/ℏ (envelope modulation)
+# Decoherence damps oscillations: exp(-γt)

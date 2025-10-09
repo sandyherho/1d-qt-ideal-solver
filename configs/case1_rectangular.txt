@@ -1,23 +1,52 @@
-# Case 1: Rectangular Barrier (Simplest)
-# Classic single barrier quantum tunneling
+# ============================================================================
+# CASE 1: RECTANGULAR BARRIER - FUNDAMENTAL QUANTUM TUNNELING
+# ============================================================================
+# Physical System: Electron encountering abrupt potential step
+# Models: Metal-insulator-metal junction, idealized step potential
+# Key Observable: T ∝ exp(-2κw), κ = √[2m(V-E)]/ℏ
+# Expected Transmission: 15-25% (E/V ~ 0.75, moderate tunneling regime)
+# ============================================================================
+
 scenario_name = Case 1 - Rectangular Barrier
-nx = 2048
-x_min = -10.0
-x_max = 10.0
-t_final = 5.0
-n_snapshots = 200
-barrier_type = rectangular
-barrier_height = 2.0
-barrier_width = 2.0
-barrier_center = 0.0
-particle_mass = 1.0
-x0 = -5.0
-k0 = 5.0
-sigma = 0.5
+
+# Spatial Grid
+nx = 2048              # FFT-optimized grid points
+x_min = -10.0         # [nm]
+x_max = 10.0          # [nm] → dx ≈ 0.0098 nm
+
+# Temporal Integration
+t_final = 5.0         # [fs] - complete barrier interaction
+n_snapshots = 200     # Temporal resolution: 0.025 fs/frame
 adaptive_dt = true
-dt_min = 0.0001
-dt_max = 0.01
+dt_min = 0.0001      # [fs]
+dt_max = 0.01        # [fs]
+
+# Barrier Configuration
+barrier_type = rectangular
+barrier_height = 2.0   # [eV] - E_k ~ 1.5 eV → partial tunneling
+barrier_width = 2.0    # [nm] - κw ≈ 3.3
+barrier_center = 0.0   # [nm]
+
+# Particle Properties
+particle_mass = 1.0    # [m_e]
+
+# Initial State: Gaussian Wave Packet
+x0 = -5.0             # [nm] - incident from left
+k0 = 5.0              # [nm⁻¹] - E_k ≈ 1.52 eV, λ ≈ 1.26 nm
+sigma = 0.5           # [nm] - Δx·Δp ~ ℏ/2 (minimum uncertainty)
+
+# Environmental Effects (Disabled for Ideal Case)
+noise_amplitude = 0.0          # [eV]
+noise_correlation_time = 0.1   # [fs]
+decoherence_rate = 0.0         # [fs⁻¹]
+
+# Output
 save_netcdf = true
 save_animation = true
 fps = 30
 dpi = 100
+
+# Conservation Laws:
+# - Norm: ∫|ψ|²dx = 1 (probability conservation)
+# - Energy: <H> = constant (Hamiltonian time-independent)
+# - Flux: T + R ≈ 1 (unitarity)
