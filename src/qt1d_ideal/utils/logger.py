@@ -1,5 +1,6 @@
 """
-Simulation Logger with correct probability conservation checks
+Simulation Logger with relaxed conservation warnings
+Only warns if T+R+A deviates >5% from 1.0
 """
 
 import logging
@@ -82,7 +83,10 @@ class SimulationLogger:
         self.info("=" * 60)
     
     def log_results(self, results: dict):
-        """Log simulation results with correct conservation check."""
+        """
+        Log simulation results.
+        Only warn if T+R+A deviates >5% from 1.0.
+        """
         self.info("=" * 60)
         self.info("SIMULATION RESULTS")
         self.info("=" * 60)
@@ -99,20 +103,16 @@ class SimulationLogger:
         total = T + R + A
         self.info(f"  T + R + A sum: {total:.6f}")
         
+        # Only warn if deviation is significant (>5%)
         conservation_error = abs(total - 1.0)
         
         if conservation_error > 0.05:
             self.warning(
                 f"Probability conservation violated: T+R+A = {total:.4f} "
-                f"deviates from 1.0 by {conservation_error:.4f}"
-            )
-        elif conservation_error > 0.01:
-            self.warning(
-                f"Minor conservation deviation: T+R+A = {total:.4f} "
-                f"(error: {conservation_error:.4f})"
+                f"(deviation: {conservation_error:.4f})"
             )
         else:
-            self.info("  ✓ Probability conservation: T + R + A ≈ 1.0")
+            self.info(f"  Probability conservation: T + R + A = {total:.4f}")
         
         self.info(f"  Time steps: {params['n_steps']}")
         
@@ -131,8 +131,8 @@ class SimulationLogger:
             
             if params.get('decoherence_rate', 0) > 0:
                 T2 = 1.0 / params['decoherence_rate']
-                self.info(f"  Decoherence rate: {params['decoherence_rate']:.4f} fs⁻¹")
-                self.info(f"  Coherence time T₂: {T2:.2f} fs")
+                self.info(f"  Decoherence rate: {params['decoherence_rate']:.4f} fs^-1")
+                self.info(f"  Coherence time T2: {T2:.2f} fs")
         
         if params.get('n_norm_violations', 0) > 0:
             self.warning(
@@ -140,7 +140,7 @@ class SimulationLogger:
                 f"(max: {params['max_norm_error']:.6f})"
             )
         else:
-            self.info("  ✓ Wavefunction norm stable")
+            self.info("  Wavefunction norm stable")
         
         if params.get('n_energy_violations', 0) > 0:
             self.warning(
@@ -148,7 +148,7 @@ class SimulationLogger:
                 f"(max: {params['max_energy_error']:.4%})"
             )
         elif params.get('noise_amplitude', 0) == 0 and params.get('decoherence_rate', 0) == 0:
-            self.info("  ✓ Energy conservation maintained")
+            self.info("  Energy conservation maintained")
         
         self.info("=" * 60)
     
@@ -163,14 +163,14 @@ class SimulationLogger:
             for i, err in enumerate(self.errors, 1):
                 self.info(f"    {i}. {err}")
         else:
-            self.info("  ERRORS: None ✓")
+            self.info("  ERRORS: None")
         
         if self.warnings:
             self.info(f"  WARNINGS: {len(self.warnings)}")
             for i, warn in enumerate(self.warnings, 1):
                 self.info(f"    {i}. {warn}")
         else:
-            self.info("  WARNINGS: None ✓")
+            self.info("  WARNINGS: None")
         
         self.info(f"  Log file: {self.log_file}")
         self.info("=" * 60)

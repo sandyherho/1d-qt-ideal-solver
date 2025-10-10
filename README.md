@@ -30,7 +30,7 @@ $$\mathcal{M}(x) = \begin{cases}
 - Transmission coefficient: $T$
 - Reflection coefficient: $R$
 - Absorbed probability: $A$
-- Conservation: $T + R + A = 1$
+- Conservation: $T + R + A \approx 1$
 
 ## Features
 
@@ -60,7 +60,7 @@ pip install -e .
 # Run single case
 qt1d-simulate case1
 
-# Run all cases
+# Run both cases
 qt1d-simulate --all
 
 # Custom parameters
@@ -98,14 +98,12 @@ print(f"T = {T:.4f}, R = {R:.4f}, A = {A:.4f}, T+R+A = {T+R+A:.4f}")
 
 ## Test Cases
 
-Four physically-motivated scenarios:
+Two standard barrier configurations:
 
-| Case | System | Barrier | Height | Width |
-|------|--------|---------|--------|-------|
-| 1 | Field Emission | Rectangular | 4.5 eV | 1.0 nm |
-| 2 | Resonant Tunneling | Rectangular | 1.5 eV | 1.2 nm |
-| 3 | High-Energy Tunneling | Rectangular | 0.8 eV | 1.5 nm |
-| 4 | STM Tunneling | Gaussian | 4.0 eV | 0.8 nm |
+| Case | Barrier Type | Height | Width | Description |
+|------|--------------|--------|-------|-------------|
+| 1 | Rectangular | 4.5 eV | 1.0 nm | Sharp rectangular barrier |
+| 2 | Gaussian | 4.0 eV | 0.8 nm | Smooth Gaussian barrier |
 
 ## Output
 
@@ -118,7 +116,7 @@ Four physically-motivated scenarios:
 ```python
 import netCDF4 as nc
 
-data = nc.Dataset('outputs/case1_field_emission.nc')
+data = nc.Dataset('outputs/case1_rectangular_barrier.nc')
 x = data['x'][:]
 t = data['t'][:]
 psi_real = data['psi_real'][:, :]

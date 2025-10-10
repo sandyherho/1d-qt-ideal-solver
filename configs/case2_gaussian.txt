@@ -1,7 +1,7 @@
-# Case 1: Field Emission (Rectangular Barrier)
-# Standard rectangular potential barrier
+# Case 2: STM Tunneling (Gaussian Barrier)
+# Smooth Gaussian potential barrier
 
-scenario_name = Case 1 - Rectangular Barrier
+scenario_name = Case 2 - Gaussian Barrier
 
 # Spatial grid
 nx = 2048
@@ -15,10 +15,10 @@ adaptive_dt = true
 dt_min = 0.0005       # fs
 dt_max = 0.01         # fs
 
-# Barrier: Rectangular barrier
-barrier_type = rectangular
-barrier_height = 4.5  # eV
-barrier_width = 1.0   # nm
+# Barrier: Gaussian barrier
+barrier_type = gaussian
+barrier_height = 4.0  # eV
+barrier_width = 0.8   # nm
 barrier_center = 0.0  # nm
 
 # Particle: Free electron
@@ -26,13 +26,13 @@ particle_mass = 1.0   # m_e
 
 # Initial state
 x0 = -8.0             # nm
-k0 = 4.0              # nm^-1
-sigma = 0.8           # nm
+k0 = 3.5              # nm^-1
+sigma = 0.6           # nm
 
 # Environment
-noise_amplitude = 0.025
-noise_correlation_time = 0.5
-decoherence_rate = 0.0005
+noise_amplitude = 0.03
+noise_correlation_time = 0.4
+decoherence_rate = 0.001
 
 # Absorbing boundaries
 boundary_width = 2.0
