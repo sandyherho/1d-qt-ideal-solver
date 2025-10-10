@@ -1,6 +1,5 @@
 """
-Simulation Logger - FIXED for Correct Probability Conservation
-Now properly validates T + R + A = 1
+Simulation Logger with correct probability conservation checks
 """
 
 import logging
@@ -12,33 +11,21 @@ class SimulationLogger:
     """Enhanced logger for quantum tunneling simulations."""
     
     def __init__(self, scenario_name: str, log_dir: str = "logs", verbose: bool = True):
-        """
-        Initialize simulation logger.
-        
-        Args:
-            scenario_name: Name of scenario (used in log filename)
-            log_dir: Directory for log files
-            verbose: If True, also print warnings/errors to console
-        """
+        """Initialize simulation logger."""
         self.scenario_name = scenario_name
         self.log_dir = Path(log_dir)
         self.verbose = verbose
         
-        # Create log directory
         self.log_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Simple filename (no timestamp, for clean output)
         self.log_file = self.log_dir / f"{scenario_name}.log"
         
-        # Set up Python logging
         self.logger = self._setup_logger()
         
-        # Track warnings and errors
         self.warnings = []
         self.errors = []
     
     def _setup_logger(self):
-        """Configure Python logging with file handler."""
+        """Configure Python logging."""
         logger = logging.getLogger(f"qt1d_{self.scenario_name}")
         logger.setLevel(logging.DEBUG)
         logger.handlers = []
@@ -95,11 +82,7 @@ class SimulationLogger:
         self.info("=" * 60)
     
     def log_results(self, results: dict):
-        """
-        Log simulation results with CORRECT probability conservation check.
-        
-        PHYSICS: T + R + A = 1 must hold for proper quantum mechanics
-        """
+        """Log simulation results with correct conservation check."""
         self.info("=" * 60)
         self.info("SIMULATION RESULTS")
         self.info("=" * 60)
@@ -109,24 +92,21 @@ class SimulationLogger:
         A = results.get('absorbed_probability', 0.0)
         params = results['params']
         
-        # Log coefficients
         self.info(f"  Transmission coefficient: {T:.6f} ({T*100:.3f}%)")
         self.info(f"  Reflection coefficient: {R:.6f} ({R*100:.3f}%)")
         self.info(f"  Absorbed probability: {A:.6f} ({A*100:.3f}%)")
         
-        # CRITICAL: Check conservation T + R + A = 1
         total = T + R + A
         self.info(f"  T + R + A sum: {total:.6f}")
         
-        # Validate conservation (should be very close to 1.0)
         conservation_error = abs(total - 1.0)
         
-        if conservation_error > 0.05:  # 5% threshold
+        if conservation_error > 0.05:
             self.warning(
                 f"Probability conservation violated: T+R+A = {total:.4f} "
                 f"deviates from 1.0 by {conservation_error:.4f}"
             )
-        elif conservation_error > 0.01:  # 1% threshold
+        elif conservation_error > 0.01:
             self.warning(
                 f"Minor conservation deviation: T+R+A = {total:.4f} "
                 f"(error: {conservation_error:.4f})"
@@ -134,7 +114,6 @@ class SimulationLogger:
         else:
             self.info("  ✓ Probability conservation: T + R + A ≈ 1.0")
         
-        # Time stepping info
         self.info(f"  Time steps: {params['n_steps']}")
         
         dt_final = params.get('dt_final', params.get('dt_mean', 0.0))
@@ -143,7 +122,6 @@ class SimulationLogger:
                  f"{params['dt_mean']:.6f} / "
                  f"{dt_final:.6f} fs")
         
-        # Environment effects
         if params.get('noise_amplitude', 0) > 0 or params.get('decoherence_rate', 0) > 0:
             self.info("  --- Stochastic Environment ---")
             
@@ -156,7 +134,6 @@ class SimulationLogger:
                 self.info(f"  Decoherence rate: {params['decoherence_rate']:.4f} fs⁻¹")
                 self.info(f"  Coherence time T₂: {T2:.2f} fs")
         
-        # Norm conservation diagnostics
         if params.get('n_norm_violations', 0) > 0:
             self.warning(
                 f"Wavefunction norm deviated {params['n_norm_violations']} times "
@@ -165,7 +142,6 @@ class SimulationLogger:
         else:
             self.info("  ✓ Wavefunction norm stable")
         
-        # Energy conservation diagnostics (clean systems only)
         if params.get('n_energy_violations', 0) > 0:
             self.warning(
                 f"Energy conservation violated {params['n_energy_violations']} times "
@@ -177,7 +153,7 @@ class SimulationLogger:
         self.info("=" * 60)
     
     def finalize(self):
-        """Write final summary and close logger."""
+        """Write final summary."""
         self.info("=" * 60)
         self.info("SIMULATION SUMMARY")
         self.info("=" * 60)

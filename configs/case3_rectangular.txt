@@ -1,0 +1,46 @@
+# Case 3: High-Energy Tunneling (Single Barrier, Simplified)
+# Physical system: High-energy electron through InGaAs/InAlAs barrier
+# Shows significant tunneling probability
+
+scenario_name = Case 3 - High Energy Tunneling
+
+# Spatial grid
+nx = 2048
+x_min = -15.0         # nm
+x_max = 15.0          # nm
+
+# Time integration
+t_final = 5.0         # fs
+n_snapshots = 200
+adaptive_dt = true
+dt_min = 0.0005       # fs
+dt_max = 0.01         # fs
+
+# Barrier: Single InAlAs barrier (low height)
+barrier_type = rectangular
+barrier_height = 0.8  # eV (low barrier, high tunneling)
+barrier_width = 1.5   # nm
+barrier_center = 0.0  # nm
+
+# Particle: InGaAs effective mass (very light)
+particle_mass = 0.041 # m_e (lightest of all cases)
+
+# Initial state: High energy electron
+x0 = -8.0             # nm (approaching from left)
+k0 = 4.5              # nm^-1 (high energy)
+sigma = 1.0           # nm (well-spread packet)
+
+# Environment: Clean system with minimal noise
+noise_amplitude = 0.01       # eV (minimal noise)
+noise_correlation_time = 0.8 # fs
+decoherence_rate = 0.0005    # fs^-1 (minimal decoherence)
+
+# Absorbing boundaries
+boundary_width = 2.0         # nm
+boundary_strength = 0.1      # moderate absorption
+
+# Output
+save_netcdf = true
+save_animation = true
+fps = 30
+dpi = 100

@@ -10,13 +10,13 @@ x_min = -15.0         # nm
 x_max = 15.0          # nm
 
 # Time integration
-t_final = 8.0         # fs
+t_final = 6.0         # fs
 n_snapshots = 200
 adaptive_dt = true
 dt_min = 0.0005       # fs
 dt_max = 0.01         # fs
 
-# Barrier: Work function barrier (typical metal surface)
+# Barrier: Work function barrier (high, narrow)
 barrier_type = rectangular
 barrier_height = 4.5  # eV (typical work function: Au ~5.1, W ~4.5 eV)
 barrier_width = 1.0   # nm (surface barrier thickness)
@@ -25,15 +25,19 @@ barrier_center = 0.0  # nm
 # Particle: Free electron
 particle_mass = 1.0   # m_e
 
-# Initial state: Electron wave packet with energy ~3 eV
+# Initial state: Electron wave packet with moderate energy
 x0 = -8.0             # nm (approaching from left)
-k0 = 4.0              # nm^-1 (E_kinetic ~ 3.5 eV)
+k0 = 4.0              # nm^-1 (E_kinetic ~ 3.5 eV, below barrier)
 sigma = 0.8           # nm (well-localized packet)
 
 # Environment: Ultra-high vacuum at room temperature
 noise_amplitude = 0.025      # eV (thermal fluctuations ~kT at 300K)
 noise_correlation_time = 0.5 # fs
 decoherence_rate = 0.0005    # fs^-1 (weak decoherence)
+
+# Absorbing boundaries
+boundary_width = 2.0         # nm
+boundary_strength = 0.1      # moderate absorption
 
 # Output
 save_netcdf = true

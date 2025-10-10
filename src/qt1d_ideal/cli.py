@@ -38,7 +38,7 @@ def normalize_scenario_name(scenario_name: str) -> str:
     
     Examples:
         "Case 1 - Field Emission" -> "case1_field_emission"
-        "Case 2 - Resonant Tunneling Diode" -> "case2_resonant_tunneling"
+        "Case 2 - Resonant Tunneling" -> "case2_resonant_tunneling"
     
     Args:
         scenario_name: Original scenario name
@@ -281,7 +281,7 @@ def main():
         'case', 
         nargs='?',
         choices=['case1', 'case2', 'case3', 'case4'],
-        help='Test case to run (1=field emission, 2=RTD, 3=multi-QW, 4=STM)'
+        help='Test case to run (1=field emission, 2=resonant tunneling, 3=high-energy, 4=STM)'
     )
     
     parser.add_argument(
@@ -374,10 +374,11 @@ def main():
             run_scenario(config, args.output_dir, verbose, args.cores)
     
     elif args.case:
+        # UPDATED: Use new config file names
         case_map = {
             'case1': 'case1_rectangular',
-            'case2': 'case2_double',
-            'case3': 'case3_triple',
+            'case2': 'case2_rectangular',   # UPDATED from case2_double
+            'case3': 'case3_rectangular',   # UPDATED from case3_triple
             'case4': 'case4_gaussian'
         }
         

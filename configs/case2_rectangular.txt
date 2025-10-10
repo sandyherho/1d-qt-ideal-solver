@@ -1,0 +1,46 @@
+# Case 2: Resonant Tunneling (Single Barrier, Simplified)
+# Physical system: Electron tunneling through AlGaAs/GaAs barrier
+# Tuned to show resonance effects with single barrier
+
+scenario_name = Case 2 - Resonant Tunneling
+
+# Spatial grid
+nx = 2048
+x_min = -15.0         # nm
+x_max = 15.0          # nm
+
+# Time integration
+t_final = 6.0         # fs
+n_snapshots = 200
+adaptive_dt = true
+dt_min = 0.0005       # fs
+dt_max = 0.01         # fs
+
+# Barrier: Single AlGaAs barrier (moderate height)
+barrier_type = rectangular
+barrier_height = 1.5  # eV (lower than Case 1, shows more tunneling)
+barrier_width = 1.2   # nm (slightly wider)
+barrier_center = 0.0  # nm
+
+# Particle: GaAs effective mass
+particle_mass = 0.067 # m_e (lighter than free electron)
+
+# Initial state: Moderate energy electron
+x0 = -8.0             # nm (approaching from left)
+k0 = 3.0              # nm^-1 (moderate energy)
+sigma = 0.9           # nm (moderate localization)
+
+# Environment: Cryogenic conditions with weak noise
+noise_amplitude = 0.015      # eV (weak thermal noise)
+noise_correlation_time = 0.7 # fs
+decoherence_rate = 0.001     # fs^-1 (weak decoherence)
+
+# Absorbing boundaries
+boundary_width = 2.0         # nm
+boundary_strength = 0.1      # moderate absorption
+
+# Output
+save_netcdf = true
+save_animation = true
+fps = 30
+dpi = 100

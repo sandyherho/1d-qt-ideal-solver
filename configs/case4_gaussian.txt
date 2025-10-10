@@ -1,40 +1,43 @@
 # Case 4: STM Tunneling (Tip-Sample Gap)
+# Physical system: Smooth vacuum gap tunneling
+# Shows quantum tunneling through Gaussian barrier
+
 scenario_name = Case 4 - STM Tunneling
 
-# Grid
+# Spatial grid
 nx = 2048
-x_min = -12.0
-x_max = 12.0
+x_min = -15.0         # nm
+x_max = 15.0          # nm
 
-# Time
-t_final = 10.0
+# Time integration
+t_final = 6.0         # fs
 n_snapshots = 200
 adaptive_dt = true
-dt_min = 0.0005
-dt_max = 0.01
+dt_min = 0.0005       # fs
+dt_max = 0.01         # fs
 
-# Barrier: Smooth vacuum gap
+# Barrier: Smooth vacuum gap (Gaussian profile)
 barrier_type = gaussian
-barrier_height = 4.0
-barrier_width = 0.8
-barrier_center = 0.0
+barrier_height = 4.0  # eV (vacuum barrier)
+barrier_width = 0.8   # nm (narrow gap)
+barrier_center = 0.0  # nm
 
-# Particle
-particle_mass = 1.0
+# Particle: Free electron
+particle_mass = 1.0   # m_e
 
 # Initial state: Low bias regime
-x0 = -6.0
-k0 = 3.5
-sigma = 0.6
+x0 = -8.0             # nm (approaching from left)
+k0 = 3.5              # nm^-1 (moderate energy)
+sigma = 0.6           # nm (well-localized)
 
-# Environment: UHV room temp
-noise_amplitude = 0.03
-noise_correlation_time = 0.4
-decoherence_rate = 0.001
+# Environment: UHV room temperature
+noise_amplitude = 0.03       # eV (slightly higher noise)
+noise_correlation_time = 0.4 # fs
+decoherence_rate = 0.001     # fs^-1 (weak decoherence)
 
-# Boundaries
-boundary_width = 2.0
-boundary_strength = 0.1
+# Absorbing boundaries
+boundary_width = 2.0         # nm
+boundary_strength = 0.1      # moderate absorption
 
 # Output
 save_netcdf = true
