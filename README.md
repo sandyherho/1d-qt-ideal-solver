@@ -150,48 +150,15 @@ R = data.reflection
 A = data.absorbed
 ```
 
-## Advanced Usage
-
-### Custom Barriers
-
-```python
-# Double barrier
-V = solver.double_barrier(height=4.0, width=0.5, separation=2.0)
-
-# Triple barrier
-V = solver.triple_barrier(height=3.0, width=0.5, separation=1.5)
-
-# Custom potential
-V = 5.0 * (1.0 - np.tanh((solver.x + 2.0) / 0.5)) * \
-          (1.0 + np.tanh((solver.x - 2.0) / 0.5))
-```
-
-### Environmental Effects
-
-```python
-# Stochastic potential
-result = solver.solve(
-    psi0=psi0, V=V, t_final=6.0,
-    noise_amplitude=0.01,
-    noise_correlation_time=0.5
-)
-
-# Pure dephasing
-result = solver.solve(
-    psi0=psi0, V=V, t_final=6.0,
-    decoherence_rate=0.0001
-)
-```
-
 ## Citation
 
 ```bibtex
 @software{qt1d_solver_2025,
   author = {Kaban, Siti N. and Herho, Sandy H. S. and 
-            Prayogo, Sonny and Anwar, Iwan P.},
+            Prayogo, Sonny and Anwar, Iwan P. and Trilaksono, Nurjanna J.},
   title = {1D Quantum Tunneling Solver with Absorbing Boundaries},
   year = {2025},
-  version = {0.0.5},
+  version = {0.0.7},
   url = {https://github.com/sandyherho/1d-qt-ideal-solver},
   doi = {10.5281/zenodo.17299767},
   license = {MIT}
@@ -204,6 +171,7 @@ result = solver.solve(
 - Sandy H. S. Herho (sandy.herho@email.ucr.edu)
 - Sonny Prayogo
 - Iwan P. Anwar
+- Nurjanna J. Trilaksono
 
 ## License
 

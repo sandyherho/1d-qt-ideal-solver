@@ -24,10 +24,10 @@ def print_header():
     print("\n" + "=" * 70)
     print(" " * 15 + "1D QUANTUM TUNNELING SOLVER")
     print(" " * 18 + "WITH ABSORBING BOUNDARIES")
-    print(" " * 25 + "Version 0.0.6")
+    print(" " * 25 + "Version 0.0.7")
     print("=" * 70)
     print("\n  Authors: Siti N. Kaban, Sandy H. S. Herho,")
-    print("           Sonny Prayogo, Iwan P. Anwar")
+    print("           Sonny Prayogo, Iwan P. Anwar, Nurjanna J. Trilaksono")
     print("\n  License: MIT License")
     print("=" * 70 + "\n")
 

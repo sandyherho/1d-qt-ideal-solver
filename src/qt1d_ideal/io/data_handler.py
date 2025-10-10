@@ -236,7 +236,7 @@ class DataHandler:
             # ============================================================
             nc.created = datetime.now().isoformat()
             nc.software = "1d-qt-ideal-solver"
-            nc.version = "0.0.6"
+            nc.version = "0.0.7"
             nc.method = "split_operator_with_absorbing_boundaries"
             nc.method_description = "Split-operator Fourier method with absorbing boundary conditions"
             
