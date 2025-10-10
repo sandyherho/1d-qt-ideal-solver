@@ -1,5 +1,6 @@
 # Case 2: STM Tunneling (Gaussian Barrier)
 # Smooth Gaussian potential barrier
+# REVISED: Reduced noise and decoherence for idealized tunneling
 
 scenario_name = Case 2 - Gaussian Barrier
 
@@ -29,14 +30,16 @@ x0 = -8.0             # nm
 k0 = 3.5              # nm^-1
 sigma = 0.6           # nm
 
-# Environment
-noise_amplitude = 0.03
+# Environment - REVISED: Nearly ideal (minimal dissipation)
+# For truly idealized solver, set all to 0.0
+# Small values kept for optional environmental effects
+noise_amplitude = 0.0         # Disabled for idealized case
 noise_correlation_time = 0.4
-decoherence_rate = 0.001
+decoherence_rate = 0.0        # Disabled for idealized case
 
-# Absorbing boundaries
-boundary_width = 2.0
-boundary_strength = 0.1
+# Absorbing boundaries - REVISED: Gentler absorption
+boundary_width = 2.5          # Increased from 2.0
+boundary_strength = 0.03      # Reduced from 0.1
 
 # Output
 save_netcdf = true

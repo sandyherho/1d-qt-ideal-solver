@@ -1,6 +1,6 @@
 """
-Simulation Logger with relaxed conservation warnings
-Only warns if T+R+A deviates >5% from 1.0
+Simulation Logger with strict conservation requirements for idealized solver
+REVISED: Warns if T+R+A deviates >3% from 1.0 (stricter than before)
 """
 
 import logging
@@ -85,7 +85,10 @@ class SimulationLogger:
     def log_results(self, results: dict):
         """
         Log simulation results.
-        Only warn if T+R+A deviates >5% from 1.0.
+        REVISED: Stricter conservation requirements for idealized solver.
+        - Warn if T+R+A deviates >3% from 1.0
+        - Warn if absorption > 10%
+        - Report quality status
         """
         self.info("=" * 60)
         self.info("SIMULATION RESULTS")
@@ -103,16 +106,37 @@ class SimulationLogger:
         total = T + R + A
         self.info(f"  T + R + A sum: {total:.6f}")
         
-        # Only warn if deviation is significant (>5%)
+        # Conservation check - REVISED stricter threshold
         conservation_error = abs(total - 1.0)
         
-        if conservation_error > 0.05:
+        if conservation_error > 0.03:  # Changed from 0.05 to 0.03
             self.warning(
                 f"Probability conservation violated: T+R+A = {total:.4f} "
                 f"(deviation: {conservation_error:.4f})"
             )
+            quality_status = "POOR"
+        elif conservation_error > 0.01:
+            self.info(f"  Probability conservation: T + R + A = {total:.4f} (acceptable)")
+            quality_status = "GOOD"
         else:
-            self.info(f"  Probability conservation: T + R + A = {total:.4f}")
+            self.info(f"  Probability conservation: T + R + A = {total:.4f} (excellent)")
+            quality_status = "EXCELLENT"
+        
+        # Check absorption level
+        if A > 0.10:  # More than 10% absorbed
+            self.warning(
+                f"High absorption detected: {A*100:.2f}% - "
+                "Consider reducing boundary_strength or increasing boundary_width"
+            )
+            if quality_status == "EXCELLENT":
+                quality_status = "GOOD"
+        elif A > 0.05:  # More than 5% absorbed
+            self.info(f"  Moderate absorption: {A*100:.2f}%")
+        else:
+            self.info(f"  Low absorption: {A*100:.2f}% (ideal)")
+        
+        # Overall quality assessment
+        self.info(f"  Simulation quality: {quality_status}")
         
         self.info(f"  Time steps: {params['n_steps']}")
         
@@ -122,18 +146,27 @@ class SimulationLogger:
                  f"{params['dt_mean']:.6f} / "
                  f"{dt_final:.6f} fs")
         
-        if params.get('noise_amplitude', 0) > 0 or params.get('decoherence_rate', 0) > 0:
+        # Environment info
+        noise_enabled = params.get('noise_amplitude', 0) > 0
+        dephasing_enabled = params.get('decoherence_rate', 0) > 0
+        
+        if noise_enabled or dephasing_enabled:
             self.info("  --- Stochastic Environment ---")
             
-            if params.get('noise_amplitude', 0) > 0:
+            if noise_enabled:
                 self.info(f"  Noise amplitude: {params['noise_amplitude']:.4f} eV")
                 self.info(f"  Noise correlation time: {params['noise_correlation_time']:.4f} fs")
             
-            if params.get('decoherence_rate', 0) > 0:
+            if dephasing_enabled:
                 T2 = 1.0 / params['decoherence_rate']
                 self.info(f"  Decoherence rate: {params['decoherence_rate']:.4f} fs^-1")
                 self.info(f"  Coherence time T2: {T2:.2f} fs")
+                self.info(f"  Dephasing type: Pure dephasing (probability conserving)")
+        else:
+            self.info("  --- Idealized (Coherent) Evolution ---")
+            self.info("  No noise or decoherence")
         
+        # Numerical stability checks
         if params.get('n_norm_violations', 0) > 0:
             self.warning(
                 f"Wavefunction norm deviated {params['n_norm_violations']} times "
@@ -147,7 +180,7 @@ class SimulationLogger:
                 f"Energy conservation violated {params['n_energy_violations']} times "
                 f"(max: {params['max_energy_error']:.4%})"
             )
-        elif params.get('noise_amplitude', 0) == 0 and params.get('decoherence_rate', 0) == 0:
+        elif not noise_enabled and not dephasing_enabled:
             self.info("  Energy conservation maintained")
         
         self.info("=" * 60)
