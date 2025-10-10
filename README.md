@@ -6,7 +6,7 @@
 [![Numba](https://img.shields.io/badge/accelerated-numba-orange.svg)](https://numba.pydata.org/)
 [![PyPI](https://img.shields.io/pypi/v/1d-qt-ideal-solver.svg)](https://pypi.org/project/1d-qt-ideal-solver/)
 
-High-performance 1D quantum tunneling solver with absorbing boundary conditions. Implements split-operator Fourier method with Numba acceleration for studying quantum tunneling through potential barriers.
+High-performance 1D quantum tunneling solver with absorbing boundary conditions. Implements split-operator Fourier method with Numba acceleration.
 
 ## Physics
 
@@ -14,16 +14,16 @@ Solves the time-dependent Schrödinger equation:
 
 $$i\frac{\partial \psi}{\partial t} = \hat{H}\psi = \left[-\frac{1}{2}\nabla^2 + V(x,t)\right]\psi$$
 
-The wavefunction evolves using the split-operator method with absorbing boundaries:
+Split-operator evolution with absorbing boundaries:
 
 $$\psi(x, t+\delta t) = \mathcal{M}_{\text{abs}} \cdot e^{-iV\delta t/2} \cdot \mathcal{F}^{-1}\left[e^{-ik^2\delta t/2}\mathcal{F}[\psi]\right] \cdot e^{-iV\delta t/2}$$
 
-where the absorbing mask is:
+Absorbing mask:
 
 $$\mathcal{M}(x) = \begin{cases}
-1 - s\left[1 - \cos^2\left(\frac{\pi i}{2n_b}\right)\right] & \text{left boundary} \\
+1 - s\left[1 - \cos^4\left(\frac{\pi i}{2n_b}\right)\right] & \text{left boundary} \\
 1 & \text{safe zone} \\
-1 - s\left[1 - \cos^2\left(\frac{\pi(N-i)}{2n_b}\right)\right] & \text{right boundary}
+1 - s\left[1 - \cos^4\left(\frac{\pi(N-i)}{2n_b}\right)\right] & \text{right boundary}
 \end{cases}$$
 
 **Observables:**
@@ -35,11 +35,11 @@ $$\mathcal{M}(x) = \begin{cases}
 ## Features
 
 - Absorbing boundary conditions prevent spurious reflections
-- Adaptive time stepping for numerical efficiency
-- Numba JIT compilation for high performance
+- Adaptive time stepping
+- Numba JIT compilation
 - Stochastic environments with noise and decoherence
 - Visualization with zone highlighting
-- NetCDF4 output with complete wavefunction data
+- NetCDF4 output
 
 ## Installation
 
@@ -74,10 +74,10 @@ from qt1d_ideal import QuantumTunneling1D, GaussianWavePacket
 # Initialize solver
 solver = QuantumTunneling1D(
     nx=2048, 
-    x_min=-15, 
-    x_max=15,
-    boundary_width=2.0,
-    boundary_strength=0.1
+    x_min=-30.0,
+    x_max=30.0,
+    boundary_width=3.0,
+    boundary_strength=0.03
 )
 
 # Create initial wavepacket
@@ -98,12 +98,33 @@ print(f"T = {T:.4f}, R = {R:.4f}, A = {A:.4f}, T+R+A = {T+R+A:.4f}")
 
 ## Test Cases
 
-Two standard barrier configurations:
+| Case | Barrier Type | Height | Width | Domain |
+|------|--------------|--------|-------|--------|
+| 1 | Rectangular | 4.5 eV | 1.0 nm | ±30 nm |
+| 2 | Gaussian | 4.0 eV | 0.8 nm | ±30 nm |
 
-| Case | Barrier Type | Height | Width | Description |
-|------|--------------|--------|-------|-------------|
-| 1 | Rectangular | 4.5 eV | 1.0 nm | Sharp rectangular barrier |
-| 2 | Gaussian | 4.0 eV | 0.8 nm | Smooth Gaussian barrier |
+## Configuration
+
+Key parameters (see `configs/` for examples):
+
+```text
+# Spatial grid
+nx = 2048
+x_min = -30.0
+x_max = 30.0
+
+# Time integration
+t_final = 6.0
+n_snapshots = 200
+
+# Absorbing boundaries
+boundary_width = 3.0
+boundary_strength = 0.03
+
+# Environment
+noise_amplitude = 0.0
+decoherence_rate = 0.0
+```
 
 ## Output
 
@@ -127,6 +148,39 @@ potential = data['potential'][:]
 T = data.transmission
 R = data.reflection
 A = data.absorbed
+```
+
+## Advanced Usage
+
+### Custom Barriers
+
+```python
+# Double barrier
+V = solver.double_barrier(height=4.0, width=0.5, separation=2.0)
+
+# Triple barrier
+V = solver.triple_barrier(height=3.0, width=0.5, separation=1.5)
+
+# Custom potential
+V = 5.0 * (1.0 - np.tanh((solver.x + 2.0) / 0.5)) * \
+          (1.0 + np.tanh((solver.x - 2.0) / 0.5))
+```
+
+### Environmental Effects
+
+```python
+# Stochastic potential
+result = solver.solve(
+    psi0=psi0, V=V, t_final=6.0,
+    noise_amplitude=0.01,
+    noise_correlation_time=0.5
+)
+
+# Pure dephasing
+result = solver.solve(
+    psi0=psi0, V=V, t_final=6.0,
+    decoherence_rate=0.0001
+)
 ```
 
 ## Citation
