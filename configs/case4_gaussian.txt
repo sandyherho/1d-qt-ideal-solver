@@ -1,37 +1,40 @@
-# Case 4: Gaussian Barrier
+# Case 4: STM Tunneling (Tip-Sample Gap)
+scenario_name = Case 4 - STM Tunneling
 
-scenario_name = Case 4 - Gaussian Barrier
-
-# Spatial grid
+# Grid
 nx = 2048
-x_min = -10.0         # nm
-x_max = 10.0          # nm
+x_min = -12.0
+x_max = 12.0
 
-# Time integration
-t_final = 5.0         # fs
+# Time
+t_final = 10.0
 n_snapshots = 200
 adaptive_dt = true
-dt_min = 0.001        # fs
-dt_max = 0.01         # fs
+dt_min = 0.0005
+dt_max = 0.01
 
-# Barrier
+# Barrier: Smooth vacuum gap
 barrier_type = gaussian
-barrier_height = 2.5
-barrier_width = 1.5   # nm
-barrier_center = 0.0  # nm
+barrier_height = 4.0
+barrier_width = 0.8
+barrier_center = 0.0
 
 # Particle
-particle_mass = 1.0   # m_e
+particle_mass = 1.0
 
-# Initial state
-x0 = -5.0             # nm
-k0 = 6.0              # nm^-1
-sigma = 0.4           # nm
+# Initial state: Low bias regime
+x0 = -6.0
+k0 = 3.5
+sigma = 0.6
 
-# Environment
-noise_amplitude = 0.10
-noise_correlation_time = 0.25   # fs
-decoherence_rate = 0.0015       # fs^-1
+# Environment: UHV room temp
+noise_amplitude = 0.03
+noise_correlation_time = 0.4
+decoherence_rate = 0.001
+
+# Boundaries
+boundary_width = 2.0
+boundary_strength = 0.1
 
 # Output
 save_netcdf = true

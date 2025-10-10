@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """
 Command Line Interface for 1D Quantum Tunneling Solver
+With Absorbing Boundary Conditions Support
 """
 
 import argparse
@@ -22,8 +23,8 @@ def print_header():
     """Print ASCII art header with version and authors."""
     print("\n" + "=" * 70)
     print(" " * 15 + "1D QUANTUM TUNNELING SOLVER")
-    print(" " * 20 + "WITH STOCHASTIC NOISE")
-    print(" " * 25 + "Version 0.0.4")
+    print(" " * 18 + "WITH ABSORBING BOUNDARIES")
+    print(" " * 25 + "Version 0.0.5")
     print("=" * 70)
     print("\n  Authors: Siti N. Kaban, Sandy H. S. Herho,")
     print("           Sonny Prayogo, Iwan P. Anwar")
@@ -36,8 +37,8 @@ def normalize_scenario_name(scenario_name: str) -> str:
     Convert scenario name to clean filename format.
     
     Examples:
-        "Case 1 - Rectangular Barrier" -> "case1_rectangular"
-        "Case 2 - Double Barrier" -> "case2_double"
+        "Case 1 - Field Emission" -> "case1_field_emission"
+        "Case 2 - Resonant Tunneling Diode" -> "case2_resonant_tunneling"
     
     Args:
         scenario_name: Original scenario name
@@ -59,17 +60,15 @@ def normalize_scenario_name(scenario_name: str) -> str:
     
     # Remove 'case_' prefix if present and extract case number
     if clean.startswith('case_'):
-        # "case_1_rectangular_barrier" -> "case1_rectangular"
+        # "case_1_field_emission" -> "case1_field_emission"
         parts = clean.split('_')
         if len(parts) >= 2 and parts[1].isdigit():
             case_num = parts[1]
             rest = '_'.join(parts[2:])
-            # Take first meaningful word after case number
-            rest_words = [w for w in rest.split('_') if len(w) > 2]
-            if rest_words:
-                clean = f"case{case_num}_{rest_words[0]}"
-            else:
-                clean = f"case{case_num}"
+            clean = f"case{case_num}_{rest}"
+    
+    # Remove trailing underscores
+    clean = clean.rstrip('_')
     
     return clean
 
@@ -130,11 +129,15 @@ def run_scenario(config: dict, output_dir: str = "outputs",
         logger.log_parameters(config)
         
         # ================================================================
-        # PHASE 1: INITIALIZE SOLVER
+        # PHASE 1: INITIALIZE SOLVER WITH ABSORBING BOUNDARIES
         # ================================================================
         with timer.time_section("solver_init"):
             if verbose:
-                print("\n[1/5] Initializing solver...")
+                print("\n[1/5] Initializing solver with absorbing boundaries...")
+            
+            # Extract boundary parameters (with sensible defaults)
+            boundary_width = config.get('boundary_width', 2.0)
+            boundary_strength = config.get('boundary_strength', 0.1)
             
             solver = QuantumTunneling1D(
                 nx=config.get('nx', 2048),
@@ -143,7 +146,9 @@ def run_scenario(config: dict, output_dir: str = "outputs",
                 adaptive_dt=config.get('adaptive_dt', True),
                 verbose=verbose,
                 logger=logger,
-                n_cores=n_cores
+                n_cores=n_cores,
+                boundary_width=boundary_width,
+                boundary_strength=boundary_strength
             )
         
         # ================================================================
@@ -187,9 +192,12 @@ def run_scenario(config: dict, output_dir: str = "outputs",
             if verbose:
                 T = result['transmission_coefficient']
                 R = result['reflection_coefficient']
+                A = result.get('absorbed_probability', 0.0)
                 print(f"      T = {T:.4f} ({T*100:.2f}%)")
                 print(f"      R = {R:.4f} ({R*100:.2f}%)")
-                print(f"      T + R = {T+R:.4f}")
+                if A > 0.001:
+                    print(f"      Absorbed = {A:.4f} ({A*100:.2f}%)")
+                print(f"      T + R + A = {T+R+A:.4f}")
         
         # ================================================================
         # PHASE 4: SAVE DATA TO NETCDF (optional)
@@ -265,7 +273,7 @@ def run_scenario(config: dict, output_dir: str = "outputs",
 def main():
     """Main entry point for command-line interface."""
     parser = argparse.ArgumentParser(
-        description='1D Quantum Tunneling Solver with Stochastic Noise',
+        description='1D Quantum Tunneling Solver with Absorbing Boundaries',
         epilog='Example: qt1d-simulate case1 --cores 8'
     )
     
@@ -273,7 +281,7 @@ def main():
         'case', 
         nargs='?',
         choices=['case1', 'case2', 'case3', 'case4'],
-        help='Test case to run (1=rectangular, 2=double, 3=triple, 4=gaussian)'
+        help='Test case to run (1=field emission, 2=RTD, 3=multi-QW, 4=STM)'
     )
     
     parser.add_argument(
@@ -308,6 +316,20 @@ def main():
         help='Quiet mode (minimal output)'
     )
     
+    parser.add_argument(
+        '--boundary-width',
+        type=float,
+        default=None,
+        help='Override absorbing boundary width in nm (default: from config or 2.0)'
+    )
+    
+    parser.add_argument(
+        '--boundary-strength',
+        type=float,
+        default=None,
+        help='Override absorbing boundary strength (default: from config or 0.1)'
+    )
+    
     args = parser.parse_args()
     verbose = not args.quiet
     
@@ -320,6 +342,13 @@ def main():
     
     if args.config:
         config = ConfigManager.load(args.config)
+        
+        # Allow command-line override of boundary parameters
+        if args.boundary_width is not None:
+            config['boundary_width'] = args.boundary_width
+        if args.boundary_strength is not None:
+            config['boundary_strength'] = args.boundary_strength
+        
         run_scenario(config, args.output_dir, verbose, args.cores)
     
     elif args.all:
@@ -335,6 +364,13 @@ def main():
                 print(f"\n[Case {i}/{len(config_files)}] Running {cfg_file.stem}...")
             
             config = ConfigManager.load(str(cfg_file))
+            
+            # Allow command-line override of boundary parameters
+            if args.boundary_width is not None:
+                config['boundary_width'] = args.boundary_width
+            if args.boundary_strength is not None:
+                config['boundary_strength'] = args.boundary_strength
+            
             run_scenario(config, args.output_dir, verbose, args.cores)
     
     elif args.case:
@@ -351,6 +387,13 @@ def main():
         
         if cfg_file.exists():
             config = ConfigManager.load(str(cfg_file))
+            
+            # Allow command-line override of boundary parameters
+            if args.boundary_width is not None:
+                config['boundary_width'] = args.boundary_width
+            if args.boundary_strength is not None:
+                config['boundary_strength'] = args.boundary_strength
+            
             run_scenario(config, args.output_dir, verbose, args.cores)
         else:
             print(f"ERROR: Configuration file not found: {cfg_file}")

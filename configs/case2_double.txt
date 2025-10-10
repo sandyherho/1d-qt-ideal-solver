@@ -1,37 +1,40 @@
-# Case 2: Double Barrier
+# Case 2: Resonant Tunneling Diode (GaAs/AlGaAs)
+scenario_name = Case 2 - Resonant Tunneling Diode
 
-scenario_name = Case 2 - Double Barrier
+# Grid
+nx = 4096
+x_min = -20.0
+x_max = 20.0
 
-# Spatial grid
-nx = 2048
-x_min = -12.0         # nm
-x_max = 12.0          # nm
-
-# Time integration
-t_final = 6.0         # fs
+# Time
+t_final = 12.0
 n_snapshots = 250
 adaptive_dt = true
-dt_min = 0.001        # fs
-dt_max = 0.01         # fs
+dt_min = 0.0003
+dt_max = 0.008
 
-# Barrier
+# Barrier: AlGaAs/GaAs quantum well
 barrier_type = double_barrier
-barrier_height = 2.0
-barrier_width = 1.0        # nm
-barrier_separation = 2.0   # nm
+barrier_height = 0.3
+barrier_width = 1.5
+barrier_separation = 5.0
 
-# Particle
-particle_mass = 1.0        # m_e
+# Particle: GaAs effective mass
+particle_mass = 0.067
 
-# Initial state
-x0 = -6.0             # nm
-k0 = 5.5              # nm^-1
-sigma = 0.5           # nm
+# Initial state: Tuned to resonance
+x0 = -10.0
+k0 = 2.8
+sigma = 1.2
 
-# Environment
-noise_amplitude = 0.05
-noise_correlation_time = 0.2   # fs
-decoherence_rate = 0.001       # fs^-1
+# Environment: 77K phonon scattering
+noise_amplitude = 0.01
+noise_correlation_time = 0.8
+decoherence_rate = 0.002
+
+# Boundaries
+boundary_width = 2.5
+boundary_strength = 0.12
 
 # Output
 save_netcdf = true

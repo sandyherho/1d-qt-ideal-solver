@@ -1,5 +1,6 @@
 """
 Simulation Logger with Enhanced Error Reporting
+Fixed to properly display absorbed probability
 """
 
 import logging
@@ -26,8 +27,7 @@ class SimulationLogger:
         # Create log directory if it doesn't exist
         self.log_dir.mkdir(parents=True, exist_ok=True)
         
-        # Generate simple filename WITHOUT timestamp (cleaner)
-        # e.g., "case1_rectangular.log" instead of "case_1___rectangular_barrier_20251008_203215.log"
+        # Generate simple filename WITHOUT timestamp
         self.log_file = self.log_dir / f"{scenario_name}.log"
         
         # Set up Python logging
@@ -109,20 +109,31 @@ class SimulationLogger:
         
         T = results['transmission_coefficient']
         R = results['reflection_coefficient']
+        A = results.get('absorbed_probability', 0.0)
         params = results['params']
         
         self.info(f"  Transmission coefficient: {T:.6f} ({T*100:.3f}%)")
         self.info(f"  Reflection coefficient: {R:.6f} ({R*100:.3f}%)")
-        self.info(f"  T + R sum: {T+R:.6f}")
         
-        if abs(T + R - 1.0) > 0.05:
-            self.warning(f"T + R = {T+R:.4f} deviates significantly from 1.0")
+        # Always show absorbed probability
+        if A > 0.001:
+            self.info(f"  Absorbed probability: {A:.6f} ({A*100:.3f}%)")
+        
+        # Show sum with absorbed
+        total = T + R + A
+        self.info(f"  T + R + A sum: {total:.6f}")
+        
+        if abs(total - 1.0) > 0.05:
+            self.warning(f"T + R + A = {total:.4f} deviates significantly from 1.0")
         
         self.info(f"  Time steps: {params['n_steps']}")
+        
+        # Fix: Show proper dt_final
+        dt_final = params.get('dt_final', params.get('dt_mean', 0.0))
         self.info(f"  dt (initial/mean/final): "
                  f"{params['dt_initial']:.6f} / "
                  f"{params['dt_mean']:.6f} / "
-                 f"{params['dt_final']:.6f} fs")
+                 f"{dt_final:.6f} fs")
         
         if params.get('noise_amplitude', 0) > 0:
             self.info("  --- Stochastic Noise ---")
@@ -147,7 +158,7 @@ class SimulationLogger:
                 f"Energy violated {params['n_energy_violations']} times "
                 f"(max: {params['max_energy_error']:.6%})"
             )
-        elif params.get('noise_amplitude', 0) == 0:
+        elif params.get('noise_amplitude', 0) == 0 and params.get('decoherence_rate', 0) == 0:
             self.info("  ✓ Energy conservation maintained")
         
         self.info("=" * 60)
