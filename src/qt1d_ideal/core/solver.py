@@ -89,7 +89,7 @@ class QuantumTunneling1D:
         
         Args:
             boundary_width: Width of absorbing layer at each edge (nm)
-            boundary_strength: Absorption strength (higher = stronger damping)
+            boundary_strength: Absorption strength (0 to 1, higher = stronger damping)
         """
         self.nx = nx
         self.x_min = x_min
@@ -123,29 +123,29 @@ class QuantumTunneling1D:
         """
         Create smooth absorbing boundary mask.
         
-        Uses cosine-squared roll-off to smoothly damp wavefunction at edges:
-        mask(x) = cos²(π(x-x_edge)/(2*width)) for x in boundary layer
+        Uses cosine-squared roll-off to smoothly damp wavefunction at edges.
+        The mask reduces amplitude near boundaries, absorbing probability flux.
         
-        This prevents spurious reflections while maintaining numerical stability.
+        Physics: mask(x) transitions from 1 (bulk) to (1-strength) at edges
         """
         mask = np.ones(self.nx)
         n_boundary = int(width / self.dx)
         
         if n_boundary > 0:
-            # Left boundary
+            # Left boundary: smooth transition from edge to bulk
             for i in range(n_boundary):
-                ratio = i / n_boundary
-                # Smooth cosine roll-off
-                mask[i] = np.cos(0.5 * np.pi * (1.0 - ratio))**2
-                # Apply damping strength
-                mask[i] = 1.0 - strength * (1.0 - mask[i])
+                ratio = i / n_boundary  # 0 at edge, 1 at bulk
+                # Cosine-squared provides smooth C² transition
+                cos_factor = np.cos(0.5 * np.pi * (1.0 - ratio))**2
+                # Apply damping: 1 at bulk, (1-strength) at edge
+                mask[i] = 1.0 - strength * (1.0 - cos_factor)
             
-            # Right boundary
+            # Right boundary: mirror of left
             for i in range(n_boundary):
                 idx = self.nx - 1 - i
                 ratio = i / n_boundary
-                mask[idx] = np.cos(0.5 * np.pi * (1.0 - ratio))**2
-                mask[idx] = 1.0 - strength * (1.0 - mask[idx])
+                cos_factor = np.cos(0.5 * np.pi * (1.0 - ratio))**2
+                mask[idx] = 1.0 - strength * (1.0 - cos_factor)
         
         return mask
     
@@ -195,11 +195,12 @@ class QuantumTunneling1D:
         """
         Solve quantum tunneling with absorbing boundaries.
         
-        The absorbing mask is applied after each time step to prevent
-        wavefunction reflections from domain boundaries.
+        PHYSICS: The absorbing mask removes probability flux at boundaries,
+        preventing spurious reflections. Conservation requires:
+        T + R + A = 1, where A is the absorbed probability.
         """
         
-        # Initialize
+        # Initialize wavefunction (normalized to 1)
         psi = psi0.copy().astype(np.complex128)
         norm = np.sqrt(np.sum(np.abs(psi)**2) * self.dx)
         psi = psi / norm
@@ -207,6 +208,7 @@ class QuantumTunneling1D:
         noise_potential = np.zeros(self.nx)
         noise_enabled = noise_amplitude > 0
         
+        # Estimate safe timestep from dispersion relation
         if dt_initial is None:
             k_max = np.max(np.abs(self.k))
             E_k_max = k_max**2 / (2.0 * particle_mass)
@@ -225,6 +227,7 @@ class QuantumTunneling1D:
                 print(f"  Decoherence: γ = {decoherence_rate:.4f} fs⁻¹ "
                       f"(T₂ ~ {1.0/decoherence_rate:.1f} fs)")
         
+        # Time evolution setup
         t = 0.0
         t_save = np.linspace(0, t_final, n_snapshots)
         save_idx = 0
@@ -239,15 +242,16 @@ class QuantumTunneling1D:
         
         psi_prev = psi.copy()
         
-        # Initial energy
+        # Initial energy (for diagnostics)
         psi_k = fft(psi)
         E_initial = compute_energy(psi, psi_k, self.k, V, self.dx, particle_mass)
         
+        # Track probability conservation
         norm_violations = []
         energy_violations = []
         max_norm_error = 0.0
         max_energy_error = 0.0
-        absorbed_probability = 0.0  # Track absorbed flux
+        absorbed_probability = 0.0  # Cumulative absorbed probability
         
         if show_progress:
             pbar = tqdm(
@@ -259,10 +263,10 @@ class QuantumTunneling1D:
         
         n_steps = 0
         while t < t_final and save_idx < n_snapshots:
-            # Store pre-absorption norm
+            # CRITICAL: Track norm BEFORE absorbing boundaries
             norm_before = np.sqrt(np.sum(np.abs(psi)**2) * self.dx)
             
-            # Stochastic noise
+            # Add stochastic noise (Ornstein-Uhlenbeck process)
             if noise_enabled:
                 decay = np.exp(-dt / noise_correlation_time)
                 noise_potential = decay * noise_potential + \
@@ -271,26 +275,30 @@ class QuantumTunneling1D:
             else:
                 V_total = V
             
-            # Split-operator step
+            # Split-operator propagation: U = e^(-iV/2) e^(-iT) e^(-iV/2)
             psi = apply_potential_operator(psi, V_total, dt / 2.0)
             psi_k = fft(psi)
             psi_k = apply_kinetic_operator(psi_k, self.k, dt, particle_mass)
             psi = ifft(psi_k)
             psi = apply_potential_operator(psi, V_total, dt / 2.0)
             
-            # Apply absorbing boundaries (CRITICAL for hard-wall behavior)
+            # Apply absorbing boundaries (removes probability flux)
             psi = apply_absorbing_mask(psi, self.boundary_mask)
             
-            # Track absorbed probability
+            # CRITICAL: Track absorbed probability (norm difference)
             norm_after = np.sqrt(np.sum(np.abs(psi)**2) * self.dx)
-            absorbed_probability += (norm_before**2 - norm_after**2)
+            absorbed_this_step = norm_before**2 - norm_after**2
+            absorbed_probability += absorbed_this_step
             
-            # Decoherence
+            # Decoherence (exponential damping)
             if decoherence_rate > 0:
                 damping = np.exp(-decoherence_rate * dt)
                 psi = psi * damping
+                # Decoherence also removes probability
+                norm_after_deco = np.sqrt(np.sum(np.abs(psi)**2) * self.dx)
+                absorbed_probability += (norm_after**2 - norm_after_deco**2)
             
-            # Stability check
+            # Numerical stability check
             if np.any(np.isnan(psi)) or np.any(np.isinf(psi)):
                 error_msg = f"Numerical instability at t={t:.3f} fs"
                 if self.logger:
@@ -299,24 +307,26 @@ class QuantumTunneling1D:
                     print(f"\n  ERROR: {error_msg}")
                 break
             
-            # Norm check (accounting for absorption and decoherence)
+            # Norm conservation diagnostic (after accounting for absorption)
             current_norm = np.sqrt(np.sum(np.abs(psi)**2) * self.dx)
-            norm_error = abs(current_norm - 1.0)
+            expected_norm = np.sqrt(1.0 - absorbed_probability)
+            norm_error = abs(current_norm - expected_norm)
             
-            # Only flag violations if no absorption/decoherence mechanisms active
-            if norm_error > 0.05 and decoherence_rate == 0.0 and absorbed_probability < 0.01:
+            if norm_error > 0.01:  # 1% threshold
                 norm_violations.append((t, norm_error))
             
             if norm_error > max_norm_error:
                 max_norm_error = norm_error
             
-            # Energy check (only for clean systems)
+            # Energy conservation diagnostic (clean systems only)
             if not noise_enabled and decoherence_rate == 0.0 and n_steps % 100 == 0 and n_steps > 0:
                 psi_k_check = fft(psi)
                 E_current = compute_energy(psi, psi_k_check, self.k, V, 
                                           self.dx, particle_mass)
-                energy_error = abs((E_current - E_initial) / E_initial)
-                if energy_error > 0.05:  # 5% threshold (looser due to boundaries)
+                # Energy should be conserved in remaining probability
+                E_expected = E_initial * (1.0 - absorbed_probability)
+                energy_error = abs((E_current - E_expected) / (E_expected + 1e-10))
+                if energy_error > 0.05:  # 5% threshold
                     energy_violations.append((t, energy_error))
                     if energy_error > max_energy_error:
                         max_energy_error = energy_error
@@ -342,6 +352,7 @@ class QuantumTunneling1D:
             if show_progress:
                 pbar.update(dt)
             
+            # Save snapshot
             if save_idx < n_snapshots and t >= t_save[save_idx]:
                 psi_hist[save_idx] = psi
                 prob_hist[save_idx] = np.abs(psi)**2
@@ -351,45 +362,72 @@ class QuantumTunneling1D:
             pbar.close()
         
         # Log diagnostics
-        if norm_violations:
-            warning = f"Norm violated {len(norm_violations)} times (max: {max_norm_error:.4f})"
-            if self.logger:
-                self.logger.warning(warning)
+        if norm_violations and self.logger:
+            self.logger.warning(
+                f"Norm conservation violated {len(norm_violations)} times "
+                f"(max deviation: {max_norm_error:.4f})"
+            )
         
-        if energy_violations:
-            warning = f"Energy varied {len(energy_violations)} times (max: {max_energy_error:.4%})"
-            if self.logger:
-                self.logger.warning(warning)
+        if energy_violations and self.logger:
+            self.logger.warning(
+                f"Energy conservation violated {len(energy_violations)} times "
+                f"(max deviation: {max_energy_error:.4%})"
+            )
         
         if self.verbose:
             print(f"  Completed {n_steps} time steps")
-            if absorbed_probability > 0.01:
-                print(f"  Absorbed probability: {absorbed_probability:.2%}")
         
-        # Compute transmission/reflection
+        # ====================================================================
+        # CRITICAL FIX: Measure T, R, A correctly
+        # ====================================================================
+        # Define barrier region to separate transmission/reflection zones
         barrier_mask = V > 0.1 * np.max(V)
         if np.any(barrier_mask):
             barrier_indices = np.where(barrier_mask)[0]
             barrier_start = barrier_indices[0]
             barrier_end = barrier_indices[-1]
         else:
+            # No barrier - use center
             barrier_start = self.nx // 2
             barrier_end = self.nx // 2
         
+        # Final probability distribution (normalized units)
         prob_final = prob_hist[save_idx - 1]
-        trans_prob = np.sum(prob_final[barrier_end:]) * self.dx
-        refl_prob = np.sum(prob_final[:barrier_start]) * self.dx
         
-        # Normalize by remaining probability (accounting for absorption)
-        total_prob = trans_prob + refl_prob
-        if total_prob > 0:
-            transmission = trans_prob / total_prob
-            reflection = refl_prob / total_prob
-        else:
-            transmission = 0.0
-            reflection = 0.0
+        # CORRECT: Measure absolute probabilities (no normalization!)
+        # These are fractions of the ORIGINAL probability (which was 1)
+        transmission = np.sum(prob_final[barrier_end:]) * self.dx
+        reflection = np.sum(prob_final[:barrier_start]) * self.dx
         
-        # Store final timestep properly
+        # Absorbed probability was tracked during evolution
+        # Alternative: calculate from remainder
+        absorbed_from_remainder = 1.0 - transmission - reflection
+        
+        # Use tracked value (more accurate for strong absorption)
+        # But check consistency
+        if abs(absorbed_probability - absorbed_from_remainder) > 0.1:
+            if self.logger:
+                self.logger.warning(
+                    f"Absorbed probability mismatch: tracked={absorbed_probability:.4f}, "
+                    f"calculated={absorbed_from_remainder:.4f}"
+                )
+        
+        # Verify conservation: T + R + A should equal 1.0
+        total_prob = transmission + reflection + absorbed_probability
+        
+        if abs(total_prob - 1.0) > 0.05:
+            if self.logger:
+                self.logger.warning(
+                    f"Probability conservation violation: T+R+A = {total_prob:.4f} ≠ 1.0"
+                )
+        
+        if self.verbose:
+            print(f"  T = {transmission:.4f} ({transmission*100:.2f}%)")
+            print(f"  R = {reflection:.4f} ({reflection*100:.2f}%)")
+            print(f"  A = {absorbed_probability:.4f} ({absorbed_probability*100:.2f}%)")
+            print(f"  T + R + A = {total_prob:.4f}")
+        
+        # Store final timestep
         dt_final_value = dt_hist[-1] if len(dt_hist) > 0 else dt
         
         return {

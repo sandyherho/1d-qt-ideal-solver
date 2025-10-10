@@ -1,19 +1,11 @@
 """
-OPTIMIZED Professional visualization for quantum tunneling animations.
-Uses parallel processing to render frames 10x faster while maintaining quality.
-
-Performance improvements:
-- Parallel frame rendering (multiprocessing)
-- Optimized matplotlib backend settings
-- Efficient memory management
-- Smart frame batching
-
-Expected speedup: 142s → ~15-20s for 200 frames
+Performance: Parallel rendering (~10x faster)
+Physics: Shows where probability is absorbed at domain edges
 """
 
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend (faster)
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from pathlib import Path
 import matplotlib as mpl
@@ -22,7 +14,7 @@ from functools import partial
 import io
 from PIL import Image
 
-# Set professional style
+# Professional style
 mpl.rcParams['font.family'] = 'sans-serif'
 mpl.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans']
 mpl.rcParams['font.size'] = 10
@@ -33,20 +25,18 @@ mpl.rcParams['ytick.major.width'] = 1.5
 
 def _render_single_frame(frame_data):
     """
-    Render a single frame (designed for parallel execution).
+    Render a single frame with visible absorbing boundaries.
     
-    This function is called by multiple processes in parallel.
-    Each process renders one frame independently.
-    
-    Args:
-        frame_data: Tuple of (frame_idx, x, psi_frame, prob_frame, V, scales, colors, title)
-        
-    Returns:
-        PIL Image of the rendered frame
+    Shows:
+    - Wavefunction (real/imaginary parts)
+    - Probability density
+    - Potential barrier
+    - Absorbing boundary regions (shaded)
     """
-    (frame_idx, x, t_val, psi_frame, prob_frame, V, 
+    (frame_idx, x, t_val, psi_frame, prob_frame, V, mask,
+     x_min, x_max, boundary_width,
      psi_max, prob_max, V_scale, V_prob, 
-     T, R, title, colors) = frame_data
+     T, R, A, title, colors) = frame_data
     
     # Create figure with black background
     fig = plt.figure(figsize=(12, 8), facecolor='black')
@@ -58,6 +48,27 @@ def _render_single_frame(frame_data):
     plt.subplots_adjust(hspace=0.35, top=0.92, bottom=0.08, left=0.08, right=0.96)
     
     # ====================================================================
+    # SHOW ABSORBING BOUNDARY REGIONS (NEW!)
+    # ====================================================================
+    x_left_boundary = x_min + boundary_width
+    x_right_boundary = x_max - boundary_width
+    
+    # Shade absorbing regions on both plots
+    for ax in [ax1, ax2]:
+        # Left absorbing region
+        ax.axvspan(x_min, x_left_boundary, 
+                   color='red', alpha=0.08, zorder=0,
+                   label='Absorbing boundary' if ax == ax1 else '')
+        # Right absorbing region
+        ax.axvspan(x_right_boundary, x_max, 
+                   color='red', alpha=0.08, zorder=0)
+        # Boundary markers
+        ax.axvline(x_left_boundary, color='red', lw=1.5, 
+                   alpha=0.4, linestyle=':', zorder=1)
+        ax.axvline(x_right_boundary, color='red', lw=1.5, 
+                   alpha=0.4, linestyle=':', zorder=1)
+    
+    # ====================================================================
     # UPPER PLOT: WAVEFUNCTION
     # ====================================================================
     ax1.plot(x, psi_frame.real, color=colors['real'], lw=2.5, 
@@ -67,10 +78,11 @@ def _render_single_frame(frame_data):
     
     ax1.axhline(0, color=colors['grid'], lw=1, alpha=0.5, zorder=1)
     
+    # Potential barrier
     ax1.fill_between(x, 0, V * V_scale, 
-                   color=colors['barrier'], alpha=0.15, zorder=2)
-    ax1.plot(x, V * V_scale, color=colors['barrier'], lw=1.5, 
-            alpha=0.6, linestyle='--', label='Barrier', zorder=2)
+                   color=colors['barrier'], alpha=0.2, zorder=2)
+    ax1.plot(x, V * V_scale, color=colors['barrier'], lw=2.0, 
+            alpha=0.7, linestyle='--', label='Barrier', zorder=2)
     
     ax1.set_ylabel('Wavefunction ψ(x,t)  [nm$^{-1/2}$]', 
                   color=colors['text'], fontsize=11, fontweight='bold')
@@ -80,9 +92,9 @@ def _render_single_frame(frame_data):
     ax1.set_title(f'{title}   |   t = {t_val:.3f} fs', 
                  color=colors['text'], fontsize=14, fontweight='bold', pad=15)
     
-    legend1 = ax1.legend(loc='upper right', framealpha=0.7, 
+    legend1 = ax1.legend(loc='upper right', framealpha=0.8, 
                        facecolor='#1a1a1a', edgecolor=colors['grid'],
-                       fontsize=10, ncol=3)
+                       fontsize=9, ncol=4)
     for text in legend1.get_texts():
         text.set_color(colors['text'])
     
@@ -99,10 +111,11 @@ def _render_single_frame(frame_data):
     ax2.plot(x, prob_frame, color=colors['prob'], lw=2.5, 
             label='|ψ(x,t)|²', alpha=0.9, zorder=4)
     
+    # Potential barrier
     ax2.fill_between(x, 0, V * V_prob, 
-                   color=colors['barrier'], alpha=0.15, zorder=2)
-    ax2.plot(x, V * V_prob, color=colors['barrier'], lw=1.5, 
-            alpha=0.6, linestyle='--', label='Barrier', zorder=2)
+                   color=colors['barrier'], alpha=0.2, zorder=2)
+    ax2.plot(x, V * V_prob, color=colors['barrier'], lw=2.0, 
+            alpha=0.7, linestyle='--', label='Barrier', zorder=2)
     
     ax2.set_xlabel('Position x  [nm]', color=colors['text'], 
                   fontsize=11, fontweight='bold')
@@ -111,9 +124,9 @@ def _render_single_frame(frame_data):
     ax2.set_ylim(0, prob_max*1.15)
     ax2.set_xlim(x[0], x[-1])
     
-    legend2 = ax2.legend(loc='upper right', framealpha=0.7, 
+    legend2 = ax2.legend(loc='upper right', framealpha=0.8, 
                        facecolor='#1a1a1a', edgecolor=colors['grid'],
-                       fontsize=10)
+                       fontsize=9)
     for text in legend2.get_texts():
         text.set_color(colors['text'])
     
@@ -122,10 +135,23 @@ def _render_single_frame(frame_data):
         spine.set_color(colors['grid'])
     ax2.tick_params(colors=colors['text'], which='both')
     
-    # Statistics box
-    stats_text = (f'Transmission: {T:.1%}   |   '
-                 f'Reflection: {R:.1%}   |   '
-                 f'T + R: {T+R:.3f}')
+    # ====================================================================
+    # STATISTICS BOX (UPDATED with A)
+    # ====================================================================
+    stats_text = (f'T: {T:.1%}   |   R: {R:.1%}   |   '
+                 f'A: {A:.1%}   |   T+R+A: {T+R+A:.3f}')
+    
+    # Color code based on conservation
+    total = T + R + A
+    if abs(total - 1.0) < 0.05:
+        box_color = '#1a4d1a'  # Green tint for good conservation
+        edge_color = '#00FF88'
+    elif abs(total - 1.0) < 0.1:
+        box_color = '#4d4d1a'  # Yellow tint for warning
+        edge_color = '#FFD700'
+    else:
+        box_color = '#4d1a1a'  # Red tint for violation
+        edge_color = '#FF3E96'
     
     ax2.text(0.5, -0.18, stats_text,
             transform=ax2.transAxes,
@@ -134,17 +160,17 @@ def _render_single_frame(frame_data):
             fontsize=10,
             fontweight='bold',
             bbox=dict(boxstyle='round,pad=0.5', 
-                    facecolor='#1a1a1a', 
-                    edgecolor=colors['grid'],
+                    facecolor=box_color, 
+                    edgecolor=edge_color,
                     linewidth=1.5,
-                    alpha=0.8))
+                    alpha=0.9))
     
     # Convert to PIL Image
     buf = io.BytesIO()
     fig.savefig(buf, format='png', dpi=100, facecolor='black')
     buf.seek(0)
     img = Image.open(buf)
-    img_copy = img.copy()  # Make a copy before closing buffer
+    img_copy = img.copy()
     buf.close()
     plt.close(fig)
     
@@ -158,18 +184,10 @@ class Animator:
     def create_gif(result, filename, output_dir="outputs", 
                   title="Quantum Tunneling", fps=30, dpi=100):
         """
-        Create professional GIF animation using parallel frame rendering.
+        Create professional GIF animation with visible absorbing boundaries.
         
-        Performance: ~10x faster than sequential rendering
-        - 200 frames: ~15-20s (vs 140s+ sequential)
-        
-        Args:
-            result: Simulation results dictionary
-            filename: Output filename
-            output_dir: Output directory
-            title: Animation title
-            fps: Frames per second
-            dpi: Resolution (note: actual dpi handled in render function)
+        NEW: Shows absorbing boundary regions where probability is removed
+        Performance: ~10x faster via parallel rendering
         """
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
@@ -179,6 +197,12 @@ class Animator:
         psi, prob, V = result['psi'], result['probability'], result['potential']
         T = result['transmission_coefficient']
         R = result['reflection_coefficient']
+        A = result.get('absorbed_probability', 0.0)
+        
+        # Get boundary parameters
+        params = result.get('params', {})
+        boundary_width = params.get('boundary_width', 2.0)
+        x_min, x_max = x[0], x[-1]
         
         # Compute scales
         psi_max = np.max(np.abs(psi))
@@ -198,6 +222,17 @@ class Animator:
             'text': '#E0E0E0'
         }
         
+        # Create absorbing mask for visualization (not used in computation, just for reference)
+        mask = np.ones(len(x))
+        n_boundary = int(boundary_width / (x[1] - x[0]))
+        if n_boundary > 0:
+            for i in range(n_boundary):
+                ratio = i / n_boundary
+                cos_factor = np.cos(0.5 * np.pi * (1.0 - ratio))**2
+                strength = params.get('boundary_strength', 0.1)
+                mask[i] = 1.0 - strength * (1.0 - cos_factor)
+                mask[-(i+1)] = mask[i]
+        
         n_frames = len(t)
         print(f"    Rendering {n_frames} frames in parallel...")
         
@@ -205,14 +240,15 @@ class Animator:
         frame_data_list = []
         for i in range(n_frames):
             frame_data = (
-                i, x, t[i], psi[i], prob[i], V,
+                i, x, t[i], psi[i], prob[i], V, mask,
+                x_min, x_max, boundary_width,
                 psi_max, prob_max, V_scale, V_prob,
-                T, R, title, colors
+                T, R, A, title, colors
             )
             frame_data_list.append(frame_data)
         
-        # Parallel rendering using all CPU cores
-        n_processes = max(1, cpu_count() - 1)  # Leave 1 core free
+        # Parallel rendering
+        n_processes = max(1, cpu_count() - 1)
         print(f"    Using {n_processes} CPU cores...")
         
         with Pool(processes=n_processes) as pool:
@@ -220,14 +256,14 @@ class Animator:
         
         print(f"    Saving GIF ({n_frames} frames @ {fps} fps)...")
         
-        # Save as GIF with optimized settings
+        # Save as GIF
         frames[0].save(
             filepath,
             save_all=True,
             append_images=frames[1:],
-            duration=1000/fps,  # milliseconds per frame
+            duration=1000/fps,
             loop=0,
-            optimize=False  # Faster saving, minimal size increase
+            optimize=False
         )
         
         print(f"    ✓ Animation complete!")

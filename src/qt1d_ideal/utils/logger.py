@@ -1,6 +1,6 @@
 """
-Simulation Logger with Enhanced Error Reporting
-Fixed to properly display absorbed probability
+Simulation Logger - FIXED for Correct Probability Conservation
+Now properly validates T + R + A = 1
 """
 
 import logging
@@ -24,39 +24,32 @@ class SimulationLogger:
         self.log_dir = Path(log_dir)
         self.verbose = verbose
         
-        # Create log directory if it doesn't exist
+        # Create log directory
         self.log_dir.mkdir(parents=True, exist_ok=True)
         
-        # Generate simple filename WITHOUT timestamp
+        # Simple filename (no timestamp, for clean output)
         self.log_file = self.log_dir / f"{scenario_name}.log"
         
         # Set up Python logging
         self.logger = self._setup_logger()
         
-        # Track all warnings and errors for summary
+        # Track warnings and errors
         self.warnings = []
         self.errors = []
     
     def _setup_logger(self):
-        """Configure Python logging with file handler and formatter."""
-        # Create logger with unique name
+        """Configure Python logging with file handler."""
         logger = logging.getLogger(f"qt1d_{self.scenario_name}")
         logger.setLevel(logging.DEBUG)
-        
-        # Clear any existing handlers (important for multiple runs)
         logger.handlers = []
         
-        # Create file handler
-        handler = logging.FileHandler(self.log_file, mode='w')  # 'w' = overwrite
+        handler = logging.FileHandler(self.log_file, mode='w')
         handler.setLevel(logging.DEBUG)
         
-        # Create formatter: timestamp - level - message
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         
-        # Attach handler to logger
         logger.addHandler(handler)
-        
         return logger
     
     def info(self, msg: str):
@@ -64,7 +57,7 @@ class SimulationLogger:
         self.logger.info(msg)
     
     def warning(self, msg: str):
-        """Log warning message and track for summary."""
+        """Log warning message."""
         self.logger.warning(msg)
         self.warnings.append(msg)
         
@@ -72,7 +65,7 @@ class SimulationLogger:
             print(f"  WARNING: {msg}")
     
     def error(self, msg: str):
-        """Log error message and track for summary."""
+        """Log error message."""
         self.logger.error(msg)
         self.errors.append(msg)
         
@@ -80,7 +73,7 @@ class SimulationLogger:
             print(f"  ERROR: {msg}")
     
     def log_parameters(self, params: dict):
-        """Log all simulation parameters in organized format."""
+        """Log all simulation parameters."""
         self.info("=" * 60)
         self.info(f"SIMULATION PARAMETERS - {params.get('scenario_name', 'Unknown')}")
         self.info("=" * 60)
@@ -91,7 +84,7 @@ class SimulationLogger:
         self.info("=" * 60)
     
     def log_timing(self, timing: dict):
-        """Log timing breakdown for different simulation phases."""
+        """Log timing breakdown."""
         self.info("=" * 60)
         self.info("TIMING BREAKDOWN")
         self.info("=" * 60)
@@ -102,7 +95,11 @@ class SimulationLogger:
         self.info("=" * 60)
     
     def log_results(self, results: dict):
-        """Log simulation results with automatic validation."""
+        """
+        Log simulation results with CORRECT probability conservation check.
+        
+        PHYSICS: T + R + A = 1 must hold for proper quantum mechanics
+        """
         self.info("=" * 60)
         self.info("SIMULATION RESULTS")
         self.info("=" * 60)
@@ -112,51 +109,67 @@ class SimulationLogger:
         A = results.get('absorbed_probability', 0.0)
         params = results['params']
         
+        # Log coefficients
         self.info(f"  Transmission coefficient: {T:.6f} ({T*100:.3f}%)")
         self.info(f"  Reflection coefficient: {R:.6f} ({R*100:.3f}%)")
+        self.info(f"  Absorbed probability: {A:.6f} ({A*100:.3f}%)")
         
-        # Always show absorbed probability
-        if A > 0.001:
-            self.info(f"  Absorbed probability: {A:.6f} ({A*100:.3f}%)")
-        
-        # Show sum with absorbed
+        # CRITICAL: Check conservation T + R + A = 1
         total = T + R + A
         self.info(f"  T + R + A sum: {total:.6f}")
         
-        if abs(total - 1.0) > 0.05:
-            self.warning(f"T + R + A = {total:.4f} deviates significantly from 1.0")
+        # Validate conservation (should be very close to 1.0)
+        conservation_error = abs(total - 1.0)
         
+        if conservation_error > 0.05:  # 5% threshold
+            self.warning(
+                f"Probability conservation violated: T+R+A = {total:.4f} "
+                f"deviates from 1.0 by {conservation_error:.4f}"
+            )
+        elif conservation_error > 0.01:  # 1% threshold
+            self.warning(
+                f"Minor conservation deviation: T+R+A = {total:.4f} "
+                f"(error: {conservation_error:.4f})"
+            )
+        else:
+            self.info("  ✓ Probability conservation: T + R + A ≈ 1.0")
+        
+        # Time stepping info
         self.info(f"  Time steps: {params['n_steps']}")
         
-        # Fix: Show proper dt_final
         dt_final = params.get('dt_final', params.get('dt_mean', 0.0))
         self.info(f"  dt (initial/mean/final): "
                  f"{params['dt_initial']:.6f} / "
                  f"{params['dt_mean']:.6f} / "
                  f"{dt_final:.6f} fs")
         
-        if params.get('noise_amplitude', 0) > 0:
-            self.info("  --- Stochastic Noise ---")
-            self.info(f"  Noise amplitude: {params['noise_amplitude']:.4f} eV")
-            self.info(f"  Noise correlation time: {params['noise_correlation_time']:.4f} fs")
+        # Environment effects
+        if params.get('noise_amplitude', 0) > 0 or params.get('decoherence_rate', 0) > 0:
+            self.info("  --- Stochastic Environment ---")
+            
+            if params.get('noise_amplitude', 0) > 0:
+                self.info(f"  Noise amplitude: {params['noise_amplitude']:.4f} eV")
+                self.info(f"  Noise correlation time: {params['noise_correlation_time']:.4f} fs")
+            
+            if params.get('decoherence_rate', 0) > 0:
+                T2 = 1.0 / params['decoherence_rate']
+                self.info(f"  Decoherence rate: {params['decoherence_rate']:.4f} fs⁻¹")
+                self.info(f"  Coherence time T₂: {T2:.2f} fs")
         
-        if params.get('decoherence_rate', 0) > 0:
-            decoherence_time = 1.0 / params['decoherence_rate']
-            self.info(f"  Decoherence rate: {params['decoherence_rate']:.4f} fs⁻¹")
-            self.info(f"  Coherence time T₂: {decoherence_time:.2f} fs")
-        
+        # Norm conservation diagnostics
         if params.get('n_norm_violations', 0) > 0:
             self.warning(
-                f"Norm violated {params['n_norm_violations']} times "
+                f"Wavefunction norm deviated {params['n_norm_violations']} times "
                 f"(max: {params['max_norm_error']:.6f})"
             )
         else:
-            self.info("  ✓ Norm conservation maintained")
+            self.info("  ✓ Wavefunction norm stable")
         
+        # Energy conservation diagnostics (clean systems only)
         if params.get('n_energy_violations', 0) > 0:
             self.warning(
-                f"Energy violated {params['n_energy_violations']} times "
-                f"(max: {params['max_energy_error']:.6%})"
+                f"Energy conservation violated {params['n_energy_violations']} times "
+                f"(max: {params['max_energy_error']:.4%})"
             )
         elif params.get('noise_amplitude', 0) == 0 and params.get('decoherence_rate', 0) == 0:
             self.info("  ✓ Energy conservation maintained")
