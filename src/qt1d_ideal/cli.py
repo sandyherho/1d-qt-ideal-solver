@@ -27,7 +27,7 @@ def print_header():
     print(" " * 25 + "Version 0.0.8")
     print("=" * 70)
     print("\n  Authors: Sandy H. S. Herho, Siti N. Kaban, Iwan P. Anwar, ")
-    print("           Sonny Prayogo, and Nurjanna J. Trilaksono")
+    print("           Nurjanna J. Trilaksono, and Rusmawan Suwarman")
     print("\n  License: MIT License")
     print("=" * 70 + "\n")
 

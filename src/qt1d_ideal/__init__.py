@@ -1,7 +1,7 @@
 """1D Quantum Tunneling Solver - Idealized Version"""
 
 __version__ = "0.0.8"
-__author__ = "Sandy H. S. Herho, Siti N. Kaban, Iwan P. Anwar, Sonny Prayogo,  Nurjanna J. Trilaksono"
+__author__ = "Sandy H. S. Herho, Siti N. Kaban, Iwan P. Anwar, Nurjanna J. Trilaksono, Rusmawan Suwarman"
 
 from .core.solver import QuantumTunneling1D
 from .core.initial_conditions import GaussianWavePacket
