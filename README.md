@@ -154,9 +154,9 @@ A = data.absorbed
 
 ```bibtex
 @software{qt1d_solver_2025,
-  author = {Kaban, Siti N. and Herho, Sandy H. S. and 
-            Prayogo, Sonny and Anwar, Iwan P. and Trilaksono, Nurjanna J.},
-  title = {1D Quantum Tunneling Solver with Absorbing Boundaries},
+  author = {Herho, Sandy H. S. and Kaban, Siti N. and Anwar, Iwan P.  
+            Prayogo, Sonny and Trilaksono, Nurjanna J.},
+  title = {{\texttt{1d-qt-ideal-solver}: 1D idealized quantum tunneling solver with absorbing boundaries}},
   year = {2025},
   version = {0.0.7},
   url = {https://github.com/sandyherho/1d-qt-ideal-solver},
@@ -167,10 +167,10 @@ A = data.absorbed
 
 ## Authors
 
-- Siti N. Kaban
 - Sandy H. S. Herho (sandy.herho@email.ucr.edu)
-- Sonny Prayogo
+- Siti N. Kaban
 - Iwan P. Anwar
+- Sonny Prayogo
 - Nurjanna J. Trilaksono
 
 ## License

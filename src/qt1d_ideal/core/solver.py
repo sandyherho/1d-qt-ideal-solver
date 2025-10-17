@@ -1,6 +1,5 @@
 """
 1D Quantum Tunneling Solver with Absorbing Boundary Conditions
-FINAL REVISION - Fixed decoherence + proper domain sizing
 """
 
 import numpy as np
@@ -105,11 +104,6 @@ class QuantumTunneling1D:
                  boundary_width: float = 3.0, boundary_strength: float = 0.03):
         """
         Initialize solver with absorbing boundary conditions.
-        
-        FINAL REVISION: 
-        - Default domain doubled: [-30, 30] nm (was [-10, 10])
-        - Default boundary_width: 3.0 nm (was 2.0)
-        - Default boundary_strength: 0.03 (was 0.1)
         """
         self.nx = nx
         self.x_min = x_min
@@ -211,11 +205,6 @@ class QuantumTunneling1D:
               decoherence_rate: float = 0.0) -> Dict[str, Any]:
         """
         Solve quantum tunneling with absorbing boundaries.
-        
-        FINAL REVISION:
-        - Proper pure dephasing (no probability loss)
-        - Energy conservation checks only in safe zone
-        - Better handling of large domains
         """
         
         # Initialize
