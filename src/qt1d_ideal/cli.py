@@ -24,7 +24,7 @@ def print_header():
     print("\n" + "=" * 70)
     print(" " * 15 + "1D QUANTUM TUNNELING SOLVER")
     print(" " * 18 + "WITH ABSORBING BOUNDARIES")
-    print(" " * 25 + "Version 0.0.8")
+    print(" " * 25 + "Version 0.0.9")
     print("=" * 70)
     print("\n  Authors: Sandy H. S. Herho, Siti N. Kaban, Iwan P. Anwar, ")
     print("           Nurjanna J. Trilaksono, and Rusmawan Suwarman")
