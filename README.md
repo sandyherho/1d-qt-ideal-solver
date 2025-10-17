@@ -12,25 +12,34 @@ High-performance 1D quantum tunneling solver with absorbing boundary conditions.
 
 Solves the time-dependent Schrödinger equation:
 
-$$i\frac{\partial \psi}{\partial t} = \hat{H}\psi = \left[-\frac{1}{2}\nabla^2 + V(x,t)\right]\psi$$
+$i\hbar\frac{\partial \psi}{\partial t} = \hat{H}\psi = \left[-\frac{\hbar^2}{2m}\nabla^2 + V(x,t)\right]\psi$
+
+In natural units ($\hbar = 1$, $m = 1$), this simplifies to:
+
+$i\frac{\partial \psi}{\partial t} = \left[-\frac{1}{2}\nabla^2 + V(x,t)\right]\psi$
 
 Split-operator evolution with absorbing boundaries:
 
-$$\psi(x, t+\delta t) = \mathcal{M}_{\text{abs}} \cdot e^{-iV\delta t/2} \cdot \mathcal{F}^{-1}\left[e^{-ik^2\delta t/2}\mathcal{F}[\psi]\right] \cdot e^{-iV\delta t/2}$$
+$\psi(x, t+\delta t) = \mathcal{M}_{\text{abs}} \cdot e^{-iV\delta t/2} \cdot \mathcal{F}^{-1}\left[e^{-ik^2\delta t/2}\mathcal{F}[\psi]\right] \cdot e^{-iV\delta t/2}$
 
-Absorbing mask:
+Absorbing mask (cos⁴ profile):
 
-$$\mathcal{M}(x) = \begin{cases}
+$\mathcal{M}(x) = \begin{cases}
 1 - s\left[1 - \cos^4\left(\frac{\pi i}{2n_b}\right)\right] & \text{left boundary} \\
 1 & \text{safe zone} \\
 1 - s\left[1 - \cos^4\left(\frac{\pi(N-i)}{2n_b}\right)\right] & \text{right boundary}
-\end{cases}$$
+\end{cases}$
+
+**Natural Units Convention:**
+- ℏ = 1 (reduced Planck constant)
+- Electron mass m_e = 1
+- Energy in eV, length in nm, time in fs
 
 **Observables:**
-- Transmission coefficient: $T$
-- Reflection coefficient: $R$
-- Absorbed probability: $A$
-- Conservation: $T + R + A \approx 1$
+- Transmission coefficient: T
+- Reflection coefficient: R
+- Absorbed probability: A
+- Conservation: T + R + A ≈ 1
 
 ## Features
 
@@ -153,15 +162,16 @@ A = data.absorbed
 ## Citation
 
 ```bibtex
-@software{qt1d_solver_2025,
-  author = {Herho, Sandy H. S. and Kaban, Siti N. and Anwar, Iwan P.  
+@article{qt1d_solver_2025,
+  author = {Herho, Sandy H. S. and Kaban, Siti N. and Anwar, Iwan P. and
             Prayogo, Sonny and Trilaksono, Nurjanna J.},
   title = {{\texttt{1d-qt-ideal-solver}: 1D idealized quantum tunneling solver with absorbing boundaries}},
-  year = {2025},
-  version = {0.0.7},
-  url = {https://github.com/sandyherho/1d-qt-ideal-solver},
+  journal = {xxxx},
+  volume = {xxxx},
+  pages = {xxxx},
+  year = {xxxx},
   doi = {10.5281/zenodo.17299767},
-  license = {MIT}
+  url = {https://github.com/sandyherho/1d-qt-ideal-solver}
 }
 ```
 
