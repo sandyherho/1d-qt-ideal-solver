@@ -236,7 +236,7 @@ class DataHandler:
             # ============================================================
             nc.created = datetime.now().isoformat()
             nc.software = "1d-qt-ideal-solver"
-            nc.version = "0.0.7"
+            nc.version = "0.0.10"
             nc.method = "split_operator_with_absorbing_boundaries"
             nc.method_description = "Split-operator Fourier method with absorbing boundary conditions"
             
@@ -247,7 +247,7 @@ class DataHandler:
             # Conventions
             nc.Conventions = "CF-1.8"
             nc.title = f"Quantum Tunneling Simulation: {metadata.get('scenario_name', 'unknown')}"
-            nc.institution = "Samudera Sains Teknologi (SST) Ltd."
+            nc.institution = "Bandung Institute of Technology (ITB)"
             nc.history = f"Created {datetime.now().isoformat()}."
             
         # File automatically closed when exiting 'with' block

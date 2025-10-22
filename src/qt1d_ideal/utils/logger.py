@@ -1,6 +1,5 @@
 """
 Simulation Logger with proper thresholds for idealized solver
-FINAL REVISION: Appropriate conservation thresholds for quantum simulations
 """
 
 import logging
@@ -166,7 +165,7 @@ class SimulationLogger:
             self.info("  --- Idealized (Coherent) Evolution ---")
             self.info("  No noise or decoherence")
         
-        # Numerical stability checks - more lenient for energy
+        # Numerical stability checks
         if params.get('n_norm_violations', 0) > 0:
             self.warning(
                 f"Wavefunction norm deviated {params['n_norm_violations']} times "
@@ -175,7 +174,7 @@ class SimulationLogger:
         else:
             self.info("  Wavefunction norm stable")
         
-        # Energy conservation - only warn if very large violations
+        # Energy conservation
         n_energy_violations = params.get('n_energy_violations', 0)
         max_energy_error = params.get('max_energy_error', 0.0)
         
